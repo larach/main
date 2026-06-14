@@ -3,855 +3,1342 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clarity — AI Planner</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Aegis — AI Due Diligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #f9f7f4; --surface: #fff; --border: #e8e4de; --text: #1a1814; --muted: #9b9590;
-  --todo-accent: #2d5a3d; --todo-light: #eef4f0; --todo-border: #b8d4bf;
-  --remember-accent: #5a3a2d; --remember-light: #fdf5f0; --remember-border: #dfc5b3;
-  --followup-accent: #2d3f6b; --followup-light: #eef1f9; --followup-border: #b3bedd;
+  --bg: #0e1420;
+  --bg-2: #141c2b;
+  --surface: #18212f;
+  --surface-2: #1e2937;
+  --border: #2a3647;
+  --border-soft: #222d3d;
+  --text: #e8edf4;
+  --text-2: #aab6c6;
+  --muted: #6b7889;
+  --accent: #c9a86a;        /* refined gold */
+  --accent-soft: #2a2517;
+  --teal: #4fb6a8;
+  --blue: #5b8def;
+  --green: #4cae7a;
+  --amber: #d9a441;
+  --red: #d96b6b;
+  --green-bg: rgba(76,174,122,0.12);
+  --amber-bg: rgba(217,164,65,0.12);
+  --red-bg: rgba(217,107,107,0.12);
+  --blue-bg: rgba(91,141,239,0.12);
+  --radius: 12px;
+  --shadow: 0 8px 40px rgba(0,0,0,0.35);
 }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text);
+  -webkit-font-smoothing: antialiased; line-height: 1.5; font-size: 14px;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+@keyframes growBar { from { width: 0; } }
+@keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(2000%); } }
+::selection { background: rgba(201,168,106,0.3); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: #38465a; }
 
-/* ═══════════════════════════════════════
-   AUTH SCREEN
-═══════════════════════════════════════ */
+.serif { font-family: 'Newsreader', serif; }
+
+/* ═══════════════════════════ AUTH ═══════════════════════════ */
 #authScreen {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  padding: 2rem; animation: fadeIn 0.4s ease;
+  min-height: 100vh; display: flex; animation: fadeIn 0.5s ease;
 }
-.auth-box {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-  padding: 2.8rem 2.6rem; width: 100%; max-width: 380px;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.06);
-  animation: fadeUp 0.4s ease;
+.auth-left {
+  flex: 1; display: none; position: relative; overflow: hidden;
+  background: radial-gradient(circle at 30% 20%, #1c2942 0%, #0e1420 55%);
+  padding: 4rem; flex-direction: column; justify-content: space-between;
 }
-.auth-logo { font-family: 'Fraunces', serif; font-weight: 300; font-size: 1.7rem; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
-.auth-tagline { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2.2rem; }
+@media (min-width: 900px) { .auth-left { display: flex; } }
+.auth-left::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(201,168,106,0.06) 1px, transparent 1px);
+  background-size: 26px 26px; pointer-events: none;
+}
+.auth-brand { display: flex; align-items: center; gap: 0.7rem; position: relative; z-index: 1; }
+.auth-mark { width: 34px; height: 34px; }
+.auth-brand-name { font-family: 'Newsreader', serif; font-size: 1.5rem; letter-spacing: 0.01em; }
+.auth-hero { position: relative; z-index: 1; max-width: 460px; }
+.auth-hero h1 { font-family: 'Newsreader', serif; font-weight: 300; font-size: 2.6rem; line-height: 1.15; letter-spacing: -0.01em; margin-bottom: 1.2rem; }
+.auth-hero h1 em { font-style: italic; color: var(--accent); }
+.auth-hero p { color: var(--text-2); font-size: 1.02rem; max-width: 420px; }
+.auth-stats { display: flex; gap: 2.5rem; position: relative; z-index: 1; }
+.auth-stat-num { font-family: 'Newsreader', serif; font-size: 1.7rem; color: var(--accent); }
+.auth-stat-lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
-.auth-tabs { display: flex; gap: 0; margin-bottom: 1.8rem; border-bottom: 1px solid var(--border); }
-.auth-tab {
-  flex: 1; padding: 0.65rem; text-align: center; font-size: 0.8rem; font-weight: 500;
-  color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: color 0.15s, border-color 0.15s;
+.auth-right { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.auth-box { width: 100%; max-width: 380px; animation: fadeUp 0.5s ease; }
+.auth-box-brand { display: none; align-items: center; gap: 0.6rem; margin-bottom: 2rem; }
+@media (max-width: 899px) { .auth-box-brand { display: flex; } }
+.auth-title { font-family: 'Newsreader', serif; font-weight: 400; font-size: 1.6rem; margin-bottom: 0.35rem; }
+.auth-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.8rem; }
+.auth-tabs { display: flex; gap: 0; margin-bottom: 1.6rem; border-bottom: 1px solid var(--border); }
+.auth-tab { flex: 1; padding: 0.6rem; text-align: center; font-size: 0.82rem; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: 0.15s; }
+.auth-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.field { margin-bottom: 1rem; }
+.label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; color: var(--text-2); margin-bottom: 0.45rem; display: block; }
+.input {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2);
+  padding: 0.72rem 0.9rem; font-family: inherit; font-size: 0.9rem; color: var(--text); transition: 0.15s;
 }
-.auth-tab.active { color: var(--text); border-bottom-color: var(--text); }
-
-.auth-field { margin-bottom: 1rem; }
-.auth-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.09em; font-weight: 500; color: var(--muted); margin-bottom: 0.5rem; display: block; }
-.auth-input {
-  width: 100%; border: 1px solid var(--border); border-radius: 7px;
-  background: var(--bg); padding: 0.75rem 0.95rem;
-  font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 300;
-  color: var(--text); outline: none; transition: border-color 0.2s;
-  letter-spacing: 0.02em;
-}
-.auth-input:focus { border-color: #aaa; background: var(--surface); }
-.auth-input.error { border-color: #c0392b; animation: shake 0.35s ease; }
-
-/* PIN dots */
-.pin-wrap { display: flex; gap: 0.6rem; }
-.pin-dot-input {
-  flex: 1; text-align: center; font-size: 1.3rem; letter-spacing: 0.1em;
-  border: 1px solid var(--border); border-radius: 7px; background: var(--bg);
-  padding: 0.65rem 0; font-family: 'DM Sans', sans-serif; font-weight: 400;
-  color: var(--text); outline: none; transition: border-color 0.2s; caret-color: transparent;
-  width: 52px;
-}
-.pin-dot-input:focus { border-color: #aaa; background: var(--surface); }
-.pin-dot-input.filled { background: var(--surface); }
-
-.auth-btn {
-  width: 100%; margin-top: 1.4rem; padding: 0.8rem;
-  background: var(--text); color: #fff; border: none; border-radius: 7px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
-  cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.01em;
-}
-.auth-btn:hover { opacity: 0.82; }
-.auth-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-.auth-error { font-size: 0.76rem; color: #c0392b; margin-top: 0.7rem; text-align: center; min-height: 1.1rem; }
-
-.auth-users { margin-bottom: 1.5rem; }
-.auth-users-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 500; margin-bottom: 0.6rem; }
-.user-pill-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.user-pill {
-  padding: 0.3rem 0.75rem; border-radius: 99px; border: 1px solid var(--border);
-  background: var(--surface); font-size: 0.78rem; cursor: pointer; color: var(--text);
-  transition: all 0.15s;
-}
-.user-pill:hover { border-color: var(--text); }
-.user-pill.active { background: var(--text); color: #fff; border-color: var(--text); }
-
-/* ═══════════════════════════════════════
-   APP
-═══════════════════════════════════════ */
-#app { display: none; animation: fadeIn 0.3s ease; }
-
-header {
-  padding: 1.4rem 2.5rem; border-bottom: 1px solid var(--border);
-  background: var(--bg); position: sticky; top: 0; z-index: 30;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.header-left { display: flex; align-items: baseline; gap: 0.75rem; }
-header h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: 1.4rem; letter-spacing: -0.02em; }
-header .tagline { font-size: 0.7rem; color: var(--muted); font-weight: 300; letter-spacing: 0.06em; text-transform: uppercase; }
-.header-right { display: flex; align-items: center; gap: 0.7rem; }
-
-.user-badge {
-  display: flex; align-items: center; gap: 0.5rem;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 99px;
-  padding: 0.3rem 0.75rem 0.3rem 0.55rem; font-size: 0.76rem; font-weight: 500;
-}
-.user-avatar {
-  width: 20px; height: 20px; border-radius: 50%; background: var(--text);
-  color: #fff; display: flex; align-items: center; justify-content: center;
-  font-size: 0.6rem; font-weight: 600; flex-shrink: 0;
-}
-
-.tabs {
-  display: flex; border-bottom: 1px solid var(--border);
-  background: var(--bg); padding: 0 2.5rem;
-}
-.tab {
-  padding: 0.8rem 1.2rem; font-size: 0.79rem; font-weight: 500; color: var(--muted);
-  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-  transition: color 0.15s, border-color 0.15s; display: flex; align-items: center;
-  gap: 0.4rem; user-select: none;
-}
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--text); border-bottom-color: var(--text); }
-.tab-badge { background: var(--border); color: var(--muted); font-size: 0.6rem; border-radius: 99px; padding: 0.1rem 0.42rem; font-weight: 500; }
-.tab.active .tab-badge { background: var(--text); color: #fff; }
-
+.input::placeholder { color: var(--muted); }
+.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,168,106,0.12); }
 .btn {
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  background: var(--text); color: #fff; border: none; border-radius: 6px;
-  padding: 0.58rem 1.1rem; font-family: 'DM Sans', sans-serif;
-  font-size: 0.81rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+  font-family: inherit; font-size: 0.88rem; font-weight: 500; border: none; border-radius: 8px;
+  padding: 0.72rem 1.1rem; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
 }
-.btn:hover { opacity: 0.82; transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-.btn-ghost {
-  background: transparent; color: var(--muted); border: 1px solid var(--border);
-  padding: 0.38rem 0.8rem; font-size: 0.74rem;
-}
-.btn-ghost:hover { color: var(--text); border-color: var(--text); opacity: 1; }
+.btn-primary { background: var(--accent); color: #1a1407; width: 100%; }
+.btn-primary:hover { background: #d8b87b; }
+.btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+.btn-sm { padding: 0.45rem 0.8rem; font-size: 0.8rem; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-hint { margin-top: 1.3rem; font-size: 0.78rem; color: var(--muted); text-align: center; }
+.auth-hint b { color: var(--text-2); font-weight: 500; }
 
-.spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+/* ═══════════════════════════ APP SHELL ═══════════════════════════ */
+#app { display: none; min-height: 100vh; }
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 232px; flex-shrink: 0; background: var(--bg-2); border-right: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+}
+.side-brand { display: flex; align-items: center; gap: 0.6rem; padding: 1.4rem 1.4rem 1.2rem; }
+.side-brand .auth-mark { width: 26px; height: 26px; }
+.side-brand-name { font-family: 'Newsreader', serif; font-size: 1.25rem; }
+.side-brand-tag { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 1px; }
+.nav { padding: 0.5rem 0.7rem; flex: 1; }
+.nav-section { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); padding: 0.9rem 0.7rem 0.4rem; }
+.nav-item {
+  display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0.7rem; border-radius: 8px;
+  color: var(--text-2); cursor: pointer; font-size: 0.88rem; font-weight: 450; transition: 0.12s; margin-bottom: 1px;
+}
+.nav-item:hover { background: var(--surface); color: var(--text); }
+.nav-item.active { background: var(--surface-2); color: var(--text); }
+.nav-item.active svg { color: var(--accent); }
+.nav-item svg { width: 17px; height: 17px; flex-shrink: 0; color: var(--muted); }
+.nav-item .badge-count { margin-left: auto; background: var(--surface-2); color: var(--text-2); font-size: 0.68rem; padding: 1px 7px; border-radius: 10px; }
+.nav-item.active .badge-count { background: var(--accent); color: #1a1407; }
+.side-user { padding: 0.9rem 1rem; border-top: 1px solid var(--border-soft); display: flex; align-items: center; gap: 0.7rem; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #8a6d3a); color: #1a1407; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.82rem; flex-shrink: 0; }
+.side-user-info { flex: 1; min-width: 0; }
+.side-user-name { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side-user-role { font-size: 0.7rem; color: var(--muted); }
+.side-logout { color: var(--muted); cursor: pointer; padding: 0.3rem; border-radius: 6px; }
+.side-logout:hover { color: var(--text); background: var(--surface); }
+.side-logout svg { width: 16px; height: 16px; display: block; }
 
-#summaryBar {
-  display: none; padding: 0.75rem 2.5rem;
-  background: #f2f0ed; border-bottom: 1px solid var(--border);
-  font-size: 0.79rem; color: var(--muted); font-family: 'Fraunces', serif; font-style: italic; font-weight: 300;
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  display: flex; align-items: center; gap: 1rem; padding: 1rem 1.8rem; border-bottom: 1px solid var(--border-soft);
+  background: rgba(14,20,32,0.85); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 30;
 }
+.crumb { font-size: 0.8rem; color: var(--muted); }
+.crumb b { color: var(--text); font-weight: 500; }
+.topbar-search { margin-left: auto; position: relative; }
+.topbar-search input { width: 240px; padding: 0.5rem 0.8rem 0.5rem 2rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 0.82rem; }
+.topbar-search input:focus { outline: none; border-color: var(--accent); }
+.topbar-search svg { position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--muted); }
+.content { padding: 1.8rem; max-width: 1280px; width: 100%; margin: 0 auto; animation: fadeIn 0.3s ease; }
 
-/* ── PANELS ── */
-.panel { display: none; }
-.panel.active { display: block; }
+.page-head { margin-bottom: 1.6rem; }
+.page-title { font-family: 'Newsreader', serif; font-weight: 400; font-size: 1.7rem; letter-spacing: -0.01em; }
+.page-desc { color: var(--text-2); font-size: 0.9rem; margin-top: 0.25rem; }
+.page-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 
-/* ── CAPTURE ── */
-.input-section {
-  padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--border);
-  display: flex; gap: 1.3rem; align-items: flex-start;
-}
-.input-wrap { flex: 1; }
-.input-label { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 500; margin-bottom: 0.6rem; }
-textarea {
-  width: 100%; min-height: 84px; border: 1px solid var(--border); border-radius: 8px;
-  background: var(--surface); padding: 0.85rem 1rem; font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem; font-weight: 300; color: var(--text); resize: vertical; outline: none;
-  line-height: 1.7; transition: border-color 0.2s;
-}
-textarea:focus { border-color: #aaa; }
-textarea::placeholder { color: var(--muted); }
-.input-hint { margin-top: 0.5rem; font-size: 0.7rem; color: var(--muted); font-style: italic; }
-.input-actions { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.45rem; flex-shrink: 0; }
+/* ═══════════════════════════ CARDS / STATS ═══════════════════════════ */
+.card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius); }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.8rem; }
+.stat { padding: 1.2rem 1.3rem; position: relative; overflow: hidden; }
+.stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.6rem; }
+.stat-value { font-family: 'Newsreader', serif; font-size: 1.9rem; font-weight: 400; line-height: 1; }
+.stat-value .unit { font-size: 1rem; color: var(--text-2); }
+.stat-sub { font-size: 0.76rem; color: var(--text-2); margin-top: 0.5rem; display: flex; align-items: center; gap: 0.3rem; }
+.stat-sub.up { color: var(--green); }
+.stat-sub.down { color: var(--red); }
+.stat-icon { position: absolute; top: 1.1rem; right: 1.2rem; width: 18px; height: 18px; color: var(--border); }
 
-.columns { display: grid; grid-template-columns: 1fr 1fr 1fr; }
-.column { padding: 1.5rem 1.6rem; border-right: 1px solid var(--border); }
-.column:last-child { border-right: none; }
-.col-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; padding-bottom: 0.85rem; }
-.col-todo .col-header { border-bottom: 2px solid var(--todo-border); }
-.col-remember .col-header { border-bottom: 2px solid var(--remember-border); }
-.col-followup .col-header { border-bottom: 2px solid var(--followup-border); }
-.col-icon { width: 25px; height: 25px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0; }
-.col-todo .col-icon { background: var(--todo-light); color: var(--todo-accent); border: 1px solid var(--todo-border); }
-.col-remember .col-icon { background: var(--remember-light); color: var(--remember-accent); border: 1px solid var(--remember-border); }
-.col-followup .col-icon { background: var(--followup-light); color: var(--followup-accent); border: 1px solid var(--followup-border); }
-.col-title { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
-.col-todo .col-title { color: var(--todo-accent); }
-.col-remember .col-title { color: var(--remember-accent); }
-.col-followup .col-title { color: var(--followup-accent); }
-.col-desc { font-size: 0.64rem; color: var(--muted); font-weight: 300; display: block; margin-top: 0.05rem; }
-.col-count { margin-left: auto; font-size: 0.66rem; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 0.08rem 0.44rem; display: none; }
+/* ═══════════════════════════ TABLE / PIPELINE ═══════════════════════════ */
+.toolbar { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.1rem; flex-wrap: wrap; }
+.chip {
+  font-size: 0.78rem; padding: 0.4rem 0.85rem; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--bg-2); color: var(--text-2); cursor: pointer; transition: 0.12s; white-space: nowrap;
+}
+.chip:hover { border-color: var(--muted); color: var(--text); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: #1a1407; font-weight: 500; }
+.toolbar-spacer { flex: 1; }
 
-.cards { display: flex; flex-direction: column; gap: 0.48rem; }
-.card {
-  background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
-  padding: 0.72rem 0.88rem; animation: fadeUp 0.28s ease both;
-  transition: border-color 0.2s, box-shadow 0.15s;
-  display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer;
+.deal-table { width: 100%; border-collapse: collapse; }
+.deal-table thead th {
+  text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted);
+  font-weight: 500; padding: 0.7rem 1rem; border-bottom: 1px solid var(--border-soft); white-space: nowrap;
 }
-.card:hover { border-color: #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-.card.done { opacity: 0.3; }
-.card.done .card-title { text-decoration: line-through; }
-.card-checkbox {
-  width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border);
-  flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; transition: all 0.15s;
-}
-.col-todo .card.done .card-checkbox { background: var(--todo-accent); border-color: var(--todo-accent); }
-.col-remember .card.done .card-checkbox { background: var(--remember-accent); border-color: var(--remember-accent); }
-.col-followup .card.done .card-checkbox { background: var(--followup-accent); border-color: var(--followup-accent); }
-.card-checkbox svg { display: none; }
-.card.done .card-checkbox svg { display: block; }
-.card-body { flex: 1; min-width: 0; }
-.card-title { font-size: 0.83rem; font-weight: 400; color: var(--text); line-height: 1.4; }
-.card-note { font-size: 0.69rem; color: var(--muted); margin-top: 0.18rem; line-height: 1.45; font-style: italic; }
-.card-meta { display: flex; align-items: center; gap: 0.38rem; margin-top: 0.35rem; flex-wrap: wrap; }
-.priority-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.priority-dot.high { background: #c0392b; }
-.priority-dot.medium { background: #c89320; }
-.priority-dot.low { background: #bbb; }
-.card-tag { font-size: 0.59rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
-.card-time { font-size: 0.62rem; color: var(--muted); margin-left: auto; }
-.card-scheduled { font-size: 0.61rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.1rem 0.38rem; border-radius: 3px; background: var(--todo-light); color: var(--todo-accent); margin-left: auto; }
-.col-empty { text-align: center; padding: 2rem 0.5rem; color: var(--muted); font-size: 0.75rem; font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; line-height: 1.9; opacity: 0.5; }
+.deal-table tbody tr { border-bottom: 1px solid var(--border-soft); cursor: pointer; transition: 0.1s; }
+.deal-table tbody tr:hover { background: var(--surface-2); }
+.deal-table tbody tr:last-child { border-bottom: none; }
+.deal-table td { padding: 0.85rem 1rem; vertical-align: middle; }
+.co-cell { display: flex; align-items: center; gap: 0.75rem; }
+.co-logo { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.82rem; flex-shrink: 0; color: #fff; }
+.co-name { font-weight: 500; font-size: 0.9rem; }
+.co-sub { font-size: 0.74rem; color: var(--muted); }
+.mono { font-variant-numeric: tabular-nums; }
 
-/* ── SCHEDULE ── */
-.schedule-toolbar {
-  padding: 0.9rem 2.5rem; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 1rem; background: var(--bg);
-  flex-wrap: wrap;
-}
-.schedule-toolbar-label { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 500; }
-.horizon-tabs { display: flex; gap: 0.3rem; }
-.horizon-tab {
-  padding: 0.32rem 0.75rem; font-size: 0.74rem; font-weight: 500; cursor: pointer;
-  border-radius: 5px; color: var(--muted); transition: all 0.15s; border: 1px solid transparent;
-}
-.horizon-tab.active { background: var(--surface); border-color: var(--border); color: var(--text); }
-.schedule-grid { padding: 1.6rem 2.5rem; display: flex; flex-direction: column; gap: 0; }
-.day-row { display: grid; grid-template-columns: 120px 1fr; border-bottom: 1px solid var(--border); min-height: 68px; animation: fadeUp 0.25s ease both; }
-.day-row:last-child { border-bottom: none; }
-.day-label { padding: 0.9rem 1rem 0.9rem 0; display: flex; flex-direction: column; justify-content: flex-start; border-right: 1px solid var(--border); flex-shrink: 0; }
-.day-name { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-.day-date { font-size: 0.66rem; color: var(--muted); font-weight: 300; margin-top: 0.12rem; }
-.day-today .day-name { color: var(--todo-accent); }
-.day-today .day-date { color: var(--todo-accent); }
-.day-tasks { padding: 0.65rem 0 0.65rem 1.1rem; display: flex; flex-direction: column; gap: 0.38rem; }
-.sched-card {
-  display: flex; align-items: flex-start; gap: 0.55rem;
-  padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--surface); cursor: pointer; transition: border-color 0.15s, opacity 0.15s;
-  animation: fadeUp 0.2s ease both;
-}
-.sched-card:hover { border-color: #ccc; }
-.sched-card.done { opacity: 0.28; }
-.sched-card.done .sched-title { text-decoration: line-through; }
-.sched-check { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-.sched-card.done .sched-check { background: var(--todo-accent); border-color: var(--todo-accent); }
-.sched-check svg { display: none; }
-.sched-card.done .sched-check svg { display: block; }
-.sched-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.sched-dot.high { background: #c0392b; }
-.sched-dot.medium { background: #c89320; }
-.sched-dot.low { background: #bbb; }
-.sched-body { flex: 1; min-width: 0; }
-.sched-title { font-size: 0.81rem; font-weight: 400; line-height: 1.4; }
-.sched-meta { display: flex; align-items: center; gap: 0.45rem; margin-top: 0.18rem; }
-.sched-type { font-size: 0.59rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.08rem 0.35rem; border-radius: 3px; }
-.sched-type.todo { background: var(--todo-light); color: var(--todo-accent); }
-.sched-type.followup { background: var(--followup-light); color: var(--followup-accent); }
-.sched-time { font-size: 0.62rem; color: var(--muted); }
-.day-empty { padding: 0.9rem 1.1rem; font-size: 0.72rem; color: var(--muted); font-style: italic; opacity: 0.5; }
-.schedule-empty-state { text-align: center; padding: 5rem 2rem; color: var(--muted); }
-.schedule-empty-state .icon { font-size: 1.8rem; opacity: 0.25; margin-bottom: 0.9rem; display: block; }
-.schedule-empty-state p { font-size: 0.83rem; font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; line-height: 1.8; }
+.badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.74rem; font-weight: 500; padding: 0.22rem 0.6rem; border-radius: 6px; white-space: nowrap; }
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+.b-screening { background: var(--blue-bg); color: #8fb4f5; }
+.b-screening .dot { background: var(--blue); }
+.b-dd { background: var(--amber-bg); color: #e6c074; }
+.b-dd .dot { background: var(--amber); }
+.b-ic { background: rgba(120,110,200,0.14); color: #b3aae6; }
+.b-ic .dot { background: #7e6de6; }
+.b-approved { background: var(--green-bg); color: #6fce9a; }
+.b-approved .dot { background: var(--green); }
+.b-declined { background: var(--red-bg); color: #e89191; }
+.b-declined .dot { background: var(--red); }
+.b-hold { background: rgba(140,150,165,0.14); color: #aab6c6; }
+.b-hold .dot { background: var(--muted); }
 
-/* ── FOOTER ── */
-.footer {
-  display: none; padding: 0.85rem 2.5rem;
-  border-top: 1px solid var(--border); background: var(--bg);
-  position: sticky; bottom: 0; align-items: center; gap: 1.8rem;
-}
-.progress-group { display: flex; align-items: center; gap: 0.55rem; flex: 1; }
-.progress-label-sm { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 500; white-space: nowrap; }
-.todo-lbl { color: var(--todo-accent); }
-.remember-lbl { color: var(--remember-accent); }
-.followup-lbl { color: var(--followup-accent); }
-.progress-bar-wrap { flex: 1; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; max-width: 80px; }
-.progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
-.todo-fill { background: var(--todo-accent); }
-.remember-fill { background: var(--remember-accent); }
-.followup-fill { background: var(--followup-accent); }
-.progress-count { font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+/* risk pill */
+.risk-pill { display: inline-flex; align-items: center; gap: 0.5rem; }
+.risk-track { width: 56px; height: 6px; border-radius: 4px; background: var(--bg); overflow: hidden; }
+.risk-fill { height: 100%; border-radius: 4px; animation: growBar 0.8s ease; }
+.risk-num { font-size: 0.82rem; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 22px; }
+.lvl-low { color: var(--green); } .fill-low { background: var(--green); }
+.lvl-med { color: var(--amber); } .fill-med { background: var(--amber); }
+.lvl-high { color: var(--red); } .fill-high { background: var(--red); }
 
-@media (max-width: 800px) {
-  .columns { grid-template-columns: 1fr; }
-  .column { border-right: none; border-bottom: 1px solid var(--border); }
-  .input-section { flex-direction: column; }
-  .input-actions { flex-direction: row; padding-top: 0; }
-  header, .input-section, #summaryBar, .schedule-toolbar, .schedule-grid { padding-left: 1.2rem; padding-right: 1.2rem; }
-  .tabs { padding: 0 1.2rem; }
-  .footer { padding: 0.8rem 1.2rem; gap: 0.8rem; flex-wrap: wrap; }
-  .column { padding: 1.2rem; }
-  .day-row { grid-template-columns: 80px 1fr; }
+/* ═══════════════════════════ DEAL DETAIL ═══════════════════════════ */
+.back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-2); font-size: 0.82rem; cursor: pointer; margin-bottom: 1.1rem; }
+.back-link:hover { color: var(--text); }
+.back-link svg { width: 15px; height: 15px; }
+.detail-head { display: flex; align-items: flex-start; gap: 1.1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.detail-logo { width: 58px; height: 58px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.3rem; color: #fff; flex-shrink: 0; }
+.detail-head-info { flex: 1; min-width: 200px; }
+.detail-co { font-family: 'Newsreader', serif; font-size: 1.7rem; font-weight: 400; }
+.detail-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; color: var(--text-2); font-size: 0.85rem; margin-top: 0.4rem; }
+.detail-meta span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.detail-actions { display: flex; gap: 0.6rem; align-items: center; }
+
+.tabs { display: flex; gap: 0.2rem; border-bottom: 1px solid var(--border-soft); margin-bottom: 1.5rem; overflow-x: auto; }
+.tab { padding: 0.7rem 1rem; font-size: 0.86rem; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: 0.12s; font-weight: 450; }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab .pip { display: inline-block; margin-left: 0.4rem; font-size: 0.68rem; padding: 0px 6px; border-radius: 9px; background: var(--surface-2); color: var(--text-2); }
+
+.grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.4rem; align-items: start; }
+@media (max-width: 920px) { .grid-2 { grid-template-columns: 1fr; } }
+.panel { padding: 1.4rem; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
+.panel-title { font-family: 'Newsreader', serif; font-size: 1.15rem; font-weight: 400; }
+.panel-title.sm { font-size: 1rem; }
+
+.kv-list { display: flex; flex-direction: column; gap: 0.1rem; }
+.kv { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border-soft); font-size: 0.86rem; }
+.kv:last-child { border-bottom: none; }
+.kv-k { color: var(--text-2); }
+.kv-v { font-weight: 500; text-align: right; }
+
+.thesis { color: var(--text-2); font-size: 0.92rem; line-height: 1.65; }
+.thesis strong { color: var(--text); font-weight: 500; }
+
+/* AI summary block */
+.ai-block { background: linear-gradient(180deg, rgba(201,168,106,0.06), transparent); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.3rem; position: relative; }
+.ai-tag { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.8rem; font-weight: 500; }
+.ai-tag svg { width: 14px; height: 14px; }
+.ai-summary-text { color: var(--text); font-size: 0.92rem; line-height: 1.7; }
+.ai-summary-text p { margin-bottom: 0.8rem; }
+.ai-summary-text p:last-child { margin-bottom: 0; }
+
+/* ═══════════════════════════ DOCUMENTS ═══════════════════════════ */
+.dropzone {
+  border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 2rem; text-align: center;
+  color: var(--text-2); cursor: pointer; transition: 0.15s; margin-bottom: 1.3rem;
 }
+.dropzone:hover, .dropzone.drag { border-color: var(--accent); background: rgba(201,168,106,0.04); color: var(--text); }
+.dropzone svg { width: 28px; height: 28px; color: var(--muted); margin-bottom: 0.5rem; }
+.dropzone b { color: var(--text); font-weight: 500; }
+.dropzone small { display: block; margin-top: 0.3rem; font-size: 0.76rem; color: var(--muted); }
+
+.doc-row { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1rem; border: 1px solid var(--border-soft); border-radius: 10px; margin-bottom: 0.7rem; background: var(--surface); transition: 0.12s; }
+.doc-row:hover { border-color: var(--border); }
+.doc-icon { width: 38px; height: 38px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.03em; }
+.doc-icon.pdf { color: #e89191; } .doc-icon.xls { color: #6fce9a; } .doc-icon.doc { color: #8fb4f5; } .doc-icon.ppt { color: #e6b074; }
+.doc-info { flex: 1; min-width: 0; }
+.doc-name { font-size: 0.88rem; font-weight: 500; }
+.doc-sub { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+.doc-status { display: flex; align-items: center; gap: 0.5rem; }
+.doc-spin { width: 15px; height: 15px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+
+.findings-panel { margin-top: 0.4rem; padding: 1rem 1.1rem 1.1rem; background: var(--bg-2); border: 1px solid var(--border-soft); border-radius: 10px; margin-bottom: 0.7rem; animation: fadeUp 0.3s ease; }
+.findings-panel .ai-tag { margin-bottom: 0.6rem; }
+.finding-summary { font-size: 0.86rem; color: var(--text-2); line-height: 1.6; margin-bottom: 0.9rem; }
+.finding-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.finding-list li { display: flex; gap: 0.6rem; font-size: 0.84rem; align-items: flex-start; }
+.finding-list li svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+.finding-list li .pos { color: var(--green); } .finding-list li .neg { color: var(--red); } .finding-list li .neu { color: var(--blue); }
+.extracted-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 0.6rem; margin-top: 0.9rem; }
+.extracted-cell { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 8px; padding: 0.6rem 0.75rem; }
+.extracted-cell .ek { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.extracted-cell .ev { font-size: 0.92rem; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+/* ═══════════════════════════ RISK ═══════════════════════════ */
+.risk-overview { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+.gauge { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
+.gauge svg { transform: rotate(-90deg); }
+.gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.gauge-score { font-family: 'Newsreader', serif; font-size: 2.4rem; line-height: 1; }
+.gauge-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-top: 3px; }
+.risk-legend { flex: 1; min-width: 220px; }
+.risk-summary-text { color: var(--text-2); font-size: 0.9rem; line-height: 1.65; }
+
+.risk-dims { display: flex; flex-direction: column; gap: 1rem; }
+.risk-dim { }
+.risk-dim-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem; }
+.risk-dim-name { font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+.risk-dim-name svg { width: 15px; height: 15px; color: var(--muted); }
+.risk-bar-track { height: 7px; border-radius: 4px; background: var(--bg); overflow: hidden; }
+.risk-bar-fill { height: 100%; border-radius: 4px; animation: growBar 0.9s ease; }
+.risk-dim-note { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; }
+
+.flag { display: flex; gap: 0.85rem; padding: 1rem 1.1rem; border-radius: 10px; border: 1px solid var(--border-soft); margin-bottom: 0.7rem; background: var(--surface); }
+.flag-sev { width: 4px; border-radius: 4px; flex-shrink: 0; }
+.flag.sev-high .flag-sev { background: var(--red); }
+.flag.sev-med .flag-sev { background: var(--amber); }
+.flag.sev-low .flag-sev { background: var(--blue); }
+.flag-body { flex: 1; }
+.flag-top { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; flex-wrap: wrap; }
+.flag-title { font-size: 0.9rem; font-weight: 500; }
+.flag-cat { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border: 1px solid var(--border); padding: 1px 7px; border-radius: 5px; }
+.flag-sev-tag { font-size: 0.68rem; font-weight: 600; padding: 1px 7px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+.flag.sev-high .flag-sev-tag { background: var(--red-bg); color: #e89191; }
+.flag.sev-med .flag-sev-tag { background: var(--amber-bg); color: #e6c074; }
+.flag.sev-low .flag-sev-tag { background: var(--blue-bg); color: #8fb4f5; }
+.flag-detail { font-size: 0.84rem; color: var(--text-2); line-height: 1.55; }
+
+/* ═══════════════════════════ REPORT ═══════════════════════════ */
+.report-empty { text-align: center; padding: 3rem 1rem; }
+.report-empty svg { width: 44px; height: 44px; color: var(--border); margin-bottom: 1rem; }
+.report-empty h3 { font-family: 'Newsreader', serif; font-weight: 400; font-size: 1.3rem; margin-bottom: 0.4rem; }
+.report-empty p { color: var(--text-2); font-size: 0.9rem; max-width: 420px; margin: 0 auto 1.4rem; }
+
+.gen-overlay { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; padding: 3rem 1rem; }
+.gen-ring { width: 54px; height: 54px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.gen-status { font-size: 0.9rem; color: var(--text-2); min-height: 1.3em; transition: 0.2s; }
+
+.report-doc {
+  background: #f6f4ee; color: #1c1a15; border-radius: var(--radius); padding: 3rem 3.2rem;
+  max-width: 800px; margin: 0 auto; box-shadow: var(--shadow); font-family: 'Newsreader', serif; animation: fadeUp 0.4s ease;
+}
+@media (max-width: 700px) { .report-doc { padding: 2rem 1.4rem; } }
+.report-doc .r-eyebrow { font-family: 'Inter', sans-serif; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: #9a7d3e; font-weight: 600; }
+.report-doc h1 { font-weight: 400; font-size: 2rem; margin: 0.3rem 0 0.2rem; letter-spacing: -0.01em; }
+.report-doc .r-sub { font-family: 'Inter', sans-serif; font-size: 0.82rem; color: #6a6456; }
+.report-doc .r-rule { height: 1px; background: #d8d2c2; margin: 1.6rem 0; }
+.report-doc h2 { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: #9a7d3e; margin: 1.8rem 0 0.7rem; }
+.report-doc p { font-size: 1.02rem; line-height: 1.7; margin-bottom: 0.9rem; }
+.report-doc ul { margin: 0 0 0.9rem 1.1rem; }
+.report-doc li { font-size: 1.0rem; line-height: 1.65; margin-bottom: 0.35rem; }
+.report-doc .r-rec { font-family: 'Inter', sans-serif; font-weight: 600; padding: 0.9rem 1.1rem; border-radius: 8px; font-size: 0.95rem; margin: 0.4rem 0 0.6rem; }
+.report-doc .r-rec.proceed { background: rgba(76,140,90,0.15); color: #2f6b3f; border: 1px solid rgba(76,140,90,0.3); }
+.report-doc .r-rec.conditional { background: rgba(190,150,40,0.15); color: #8a6a1a; border: 1px solid rgba(190,150,40,0.3); }
+.report-doc .r-grid { font-family: 'Inter', sans-serif; display: grid; grid-template-columns: 1fr 1fr; gap: 0.1rem 1.5rem; }
+.report-doc .r-grid .rg-row { display: flex; justify-content: space-between; padding: 0.45rem 0; border-bottom: 1px solid #e3ddcd; font-size: 0.9rem; }
+.report-doc .r-grid .rg-k { color: #6a6456; }
+.report-doc .r-grid .rg-v { font-weight: 500; }
+.report-doc .r-foot { font-family: 'Inter', sans-serif; font-size: 0.72rem; color: #8a8474; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #d8d2c2; }
+.report-bar { max-width: 800px; margin: 0 auto 1.1rem; display: flex; gap: 0.6rem; justify-content: flex-end; }
+
+/* ═══════════════════════════ MISC ═══════════════════════════ */
+.empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 0.8rem 1.2rem;
+  border-radius: 10px; font-size: 0.86rem; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: 0.25s; z-index: 100;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast svg { width: 16px; height: 16px; color: var(--accent); }
+.section-gap { margin-top: 1.8rem; }
+.placeholder-note { color: var(--muted); font-size: 0.86rem; padding: 0.5rem 0; }
+.spin-inline { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(26,20,7,0.3); border-top-color: #1a1407; border-radius: 50%; animation: spin 0.7s linear infinite; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     AUTH SCREEN
-═══════════════════════════════════════ -->
+<!-- ═══════════════════════════ AUTH ═══════════════════════════ -->
 <div id="authScreen">
-  <div class="auth-box">
-    <div class="auth-logo">Clarity</div>
-    <div class="auth-tagline">AI Personal Planner</div>
-
-    <div id="existingUsers" style="display:none">
-      <div class="auth-users">
-        <div class="auth-users-label">Welcome back</div>
-        <div class="user-pill-list" id="userPillList"></div>
-      </div>
+  <div class="auth-left">
+    <div class="auth-brand">
+      <svg class="auth-mark" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 7v8c0 7 5 12 12 15 7-3 12-8 12-15V7L16 2z" stroke="#c9a86a" stroke-width="1.6" fill="rgba(201,168,106,0.08)"/><path d="M11 16l3.5 3.5L21 12" stroke="#c9a86a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="auth-brand-name">Aegis</span>
     </div>
-
-    <div class="auth-tabs">
-      <div class="auth-tab active" id="atab-signin" onclick="switchAuthTab('signin')">Sign in</div>
-      <div class="auth-tab" id="atab-create" onclick="switchAuthTab('create')">New account</div>
+    <div class="auth-hero">
+      <h1>Institutional-grade <em>due diligence</em>, accelerated by AI.</h1>
+      <p>Aegis is the diligence workbench for the Investment Authority — triage your pipeline, analyze data rooms in minutes, surface red flags, and produce committee-ready memos.</p>
     </div>
-
-    <!-- SIGN IN -->
-    <div id="form-signin">
-      <div class="auth-field">
-        <label class="auth-label">Your name</label>
-        <input class="auth-input" id="si-name" type="text" placeholder="e.g. Alex" autocomplete="off" />
+    <div class="auth-stats">
+      <div><div class="auth-stat-num">340+</div><div class="auth-stat-lbl">Deals screened</div></div>
+      <div><div class="auth-stat-num">12hrs</div><div class="auth-stat-lbl">Avg. DD turnaround</div></div>
+      <div><div class="auth-stat-num">$8.4B</div><div class="auth-stat-lbl">Capital evaluated</div></div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="auth-box-brand">
+        <svg class="auth-mark" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 7v8c0 7 5 12 12 15 7-3 12-8 12-15V7L16 2z" stroke="#c9a86a" stroke-width="1.6" fill="rgba(201,168,106,0.08)"/><path d="M11 16l3.5 3.5L21 12" stroke="#c9a86a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="auth-brand-name serif">Aegis</span>
       </div>
-      <div class="auth-field">
-        <label class="auth-label">4-digit PIN</label>
-        <div class="pin-wrap" id="si-pin-wrap">
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+      <div class="auth-title" id="authTitle">Welcome back</div>
+      <div class="auth-sub" id="authSub">Sign in to your diligence workspace</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-mode="signin" onclick="setAuthMode('signin')">Sign in</div>
+        <div class="auth-tab" data-mode="signup" onclick="setAuthMode('signup')">Create account</div>
+      </div>
+      <form onsubmit="doAuth(event)">
+        <div class="field" id="nameField" style="display:none;">
+          <label class="label">Full name</label>
+          <input class="input" id="authName" placeholder="Jordan Reyes" autocomplete="name">
         </div>
-      </div>
-      <div class="auth-error" id="si-error"></div>
-      <button class="auth-btn" onclick="signIn()">Sign in →</button>
-    </div>
-
-    <!-- CREATE -->
-    <div id="form-create" style="display:none">
-      <div class="auth-field">
-        <label class="auth-label">Choose a name</label>
-        <input class="auth-input" id="cr-name" type="text" placeholder="e.g. Alex" autocomplete="off" />
-      </div>
-      <div class="auth-field">
-        <label class="auth-label">Choose a 4-digit PIN</label>
-        <div class="pin-wrap" id="cr-pin-wrap">
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
-          <input class="pin-dot-input" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <div class="field">
+          <label class="label">Work email</label>
+          <input class="input" id="authEmail" type="email" placeholder="analyst@authority.gov" autocomplete="email">
         </div>
-      </div>
-      <div class="auth-error" id="cr-error"></div>
-      <button class="auth-btn" onclick="createAccount()">Create account →</button>
+        <div class="field">
+          <label class="label">Password</label>
+          <input class="input" id="authPass" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary" type="submit" id="authBtn">Sign in</button>
+      </form>
+      <div class="auth-hint">Demo workspace — <b>any email & password</b> will sign you in.</div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     APP
-═══════════════════════════════════════ -->
+<!-- ═══════════════════════════ APP ═══════════════════════════ -->
 <div id="app">
-  <header>
-    <div class="header-left">
-      <h1>Clarity</h1>
-      <span class="tagline">AI Personal Planner</span>
-    </div>
-    <div class="header-right">
-      <div class="user-badge">
-        <div class="user-avatar" id="userAvatar"></div>
-        <span id="userNameDisplay"></span>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <svg class="auth-mark" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 7v8c0 7 5 12 12 15 7-3 12-8 12-15V7L16 2z" stroke="#c9a86a" stroke-width="1.6" fill="rgba(201,168,106,0.08)"/><path d="M11 16l3.5 3.5L21 12" stroke="#c9a86a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><div class="side-brand-name serif">Aegis</div><div class="side-brand-tag">Investment Authority</div></div>
       </div>
-      <button class="btn btn-ghost" id="clearBtn" onclick="clearAll()" style="display:none">Clear</button>
-      <button class="btn btn-ghost" onclick="signOut()">Sign out</button>
-    </div>
-  </header>
-
-  <div class="tabs">
-    <div class="tab active" id="tab-capture" onclick="switchTab('capture')">
-      Capture <span class="tab-badge" id="badge-capture">0</span>
-    </div>
-    <div class="tab" id="tab-schedule" onclick="switchTab('schedule')">
-      Schedule <span class="tab-badge" id="badge-schedule">0</span>
-    </div>
-  </div>
-
-  <!-- CAPTURE -->
-  <div class="panel active" id="panel-capture">
-    <div class="input-section">
-      <div class="input-wrap">
-        <div class="input-label">Brain dump</div>
-        <textarea id="dump" placeholder="Pour it all out — don't filter…&#10;&#10;Call dentist, Sarah's birthday next week, waiting on Mike's budget reply, submit expenses by Friday, fix login bug before launch…"></textarea>
-        <p class="input-hint">Anything goes — AI sorts into To Do, Remember & Follow Up, then schedules across your week. ⌘↵ to run.</p>
-      </div>
-      <div class="input-actions">
-        <button class="btn" id="analyzeBtn" onclick="analyze()">
-          <span id="btnText">Organize →</span>
-          <span class="spinner" id="spinner"></span>
-        </button>
-      </div>
-    </div>
-
-    <div id="summaryBar"></div>
-
-    <div class="columns">
-      <div class="column col-todo">
-        <div class="col-header">
-          <div class="col-icon">✓</div>
-          <div><span class="col-title">To Do</span><span class="col-desc">Actions to take</span></div>
-          <span class="col-count" id="count-todo"></span>
+      <nav class="nav" id="nav">
+        <div class="nav-section">Workspace</div>
+        <div class="nav-item active" data-view="dashboard" onclick="go('dashboard')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Dashboard
         </div>
-        <div class="cards" id="cards-todo"><div class="col-empty">Concrete tasks &<br>action items appear here.</div></div>
-      </div>
-      <div class="column col-remember">
-        <div class="col-header">
-          <div class="col-icon">◈</div>
-          <div><span class="col-title">Remember</span><span class="col-desc">Keep in mind</span></div>
-          <span class="col-count" id="count-remember"></span>
+        <div class="nav-item" data-view="pipeline" onclick="go('pipeline')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+          Deal Pipeline
+          <span class="badge-count" id="navPipelineCount">8</span>
         </div>
-        <div class="cards" id="cards-remember"><div class="col-empty">Dates, context &<br>things not to forget.</div></div>
-      </div>
-      <div class="column col-followup">
-        <div class="col-header">
-          <div class="col-icon">↺</div>
-          <div><span class="col-title">Follow Up</span><span class="col-desc">Waiting & pending</span></div>
-          <span class="col-count" id="count-followup"></span>
+        <div class="nav-item" data-view="reports" onclick="go('reports')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+          DD Reports
+          <span class="badge-count" id="navReportsCount">0</span>
         </div>
-        <div class="cards" id="cards-followup"><div class="col-empty">Replies awaited,<br>items to check back on.</div></div>
+        <div class="nav-section">Insights</div>
+        <div class="nav-item" data-view="risk" onclick="go('risk')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          Risk Monitor
+        </div>
+      </nav>
+      <div class="side-user">
+        <div class="avatar" id="userAvatar">JR</div>
+        <div class="side-user-info">
+          <div class="side-user-name" id="userName">Jordan Reyes</div>
+          <div class="side-user-role">Investment Analyst</div>
+        </div>
+        <div class="side-logout" onclick="logout()" title="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </div>
       </div>
-    </div>
+    </aside>
 
-    <div class="footer" id="footer">
-      <div class="progress-group">
-        <span class="progress-label-sm todo-lbl">To Do</span>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill todo-fill" id="fill-todo" style="width:0%"></div></div>
-        <span class="progress-count" id="prog-todo">—</span>
+    <main class="main">
+      <div class="topbar">
+        <div class="crumb" id="crumb"><b>Dashboard</b></div>
+        <div class="topbar-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="globalSearch" placeholder="Search deals…" oninput="onSearch(this.value)">
+        </div>
       </div>
-      <div class="progress-group">
-        <span class="progress-label-sm remember-lbl">Remember</span>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill remember-fill" id="fill-remember" style="width:0%"></div></div>
-        <span class="progress-count" id="prog-remember">—</span>
-      </div>
-      <div class="progress-group">
-        <span class="progress-label-sm followup-lbl">Follow Up</span>
-        <div class="progress-bar-wrap"><div class="progress-bar-fill followup-fill" id="fill-followup" style="width:0%"></div></div>
-        <span class="progress-count" id="prog-followup">—</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCHEDULE -->
-  <div class="panel" id="panel-schedule">
-    <div class="schedule-toolbar">
-      <span class="schedule-toolbar-label">View</span>
-      <div class="horizon-tabs">
-        <div class="horizon-tab active" onclick="setHorizon('week')" id="ht-week">This week</div>
-        <div class="horizon-tab" onclick="setHorizon('twoweek')" id="ht-twoweek">2 weeks</div>
-        <div class="horizon-tab" onclick="setHorizon('month')" id="ht-month">Month</div>
-      </div>
-    </div>
-    <div class="schedule-grid" id="scheduleGrid">
-      <div class="schedule-empty-state">
-        <span class="icon">◎</span>
-        <p>Dump your tasks on the Capture tab<br>and the AI will schedule them here.</p>
-      </div>
-    </div>
+      <div class="content" id="content"><!-- views render here --></div>
+    </main>
   </div>
 </div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg">Done</span></div>
 
 <script>
-/* ══════════════════════════════════════
-   AUTH
-══════════════════════════════════════ */
-var currentUser = null;
+/* ═══════════════════════════════════════════════════════════════
+   AEGIS — AI Due Diligence Platform (single-file prototype)
+   All AI output is simulated. No backend, no API keys.
+═══════════════════════════════════════════════════════════════ */
 
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem('clarity_users') || '{}'); } catch(e) { return {}; }
-}
-function saveUsers(u) { localStorage.setItem('clarity_users', JSON.stringify(u)); }
-function getUserData(name) {
-  try { return JSON.parse(localStorage.getItem('clarity_data_' + name) || 'null'); } catch(e) { return null; }
-}
-function saveUserData(name, data) { localStorage.setItem('clarity_data_' + name, JSON.stringify(data)); }
+/* ---------- mock deal data ---------- */
+const COLORS = ['#5b8def','#4fb6a8','#c9a86a','#9a7de6','#d98a6b','#5fb8c9','#c97da0','#6fae7a'];
+function logoColor(i){ return COLORS[i % COLORS.length]; }
+function initials(name){ return name.split(' ').filter(w=>w.length>2 || /[A-Z]/.test(w[0])).slice(0,2).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
 
-function hashPin(pin) {
-  // Simple hash — good enough for local offline use
-  var h = 0;
-  for (var i = 0; i < pin.length; i++) { h = (Math.imul(31, h) + pin.charCodeAt(i)) | 0; }
-  return h.toString(36);
-}
-
-function getPin(wrapId) {
-  return Array.from(document.querySelectorAll('#' + wrapId + ' .pin-dot-input')).map(i => i.value).join('');
-}
-
-function initPinInputs(wrapId) {
-  var inputs = Array.from(document.querySelectorAll('#' + wrapId + ' .pin-dot-input'));
-  inputs.forEach(function(inp, idx) {
-    inp.value = '';
-    inp.addEventListener('input', function() {
-      inp.value = inp.value.replace(/[^0-9]/g, '').slice(-1);
-      if (inp.value && idx < inputs.length - 1) inputs[idx + 1].focus();
-    });
-    inp.addEventListener('keydown', function(e) {
-      if (e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx - 1].focus();
-    });
-    inp.addEventListener('paste', function(e) {
-      var paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
-      inputs.forEach(function(inp2, i) { inp2.value = paste[i] || ''; });
-      e.preventDefault();
-    });
-  });
-}
-
-function switchAuthTab(tab) {
-  document.getElementById('atab-signin').classList.toggle('active', tab === 'signin');
-  document.getElementById('atab-create').classList.toggle('active', tab === 'create');
-  document.getElementById('form-signin').style.display = tab === 'signin' ? 'block' : 'none';
-  document.getElementById('form-create').style.display = tab === 'create' ? 'block' : 'none';
-  document.getElementById('si-error').textContent = '';
-  document.getElementById('cr-error').textContent = '';
-}
-
-function loadExistingUsers() {
-  var users = getUsers();
-  var names = Object.keys(users);
-  var wrap = document.getElementById('existingUsers');
-  var list = document.getElementById('userPillList');
-  list.innerHTML = '';
-  if (names.length) {
-    wrap.style.display = 'block';
-    names.forEach(function(name) {
-      var pill = document.createElement('div');
-      pill.className = 'user-pill';
-      pill.textContent = name;
-      pill.onclick = function() {
-        document.querySelectorAll('.user-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        document.getElementById('si-name').value = name;
-        document.querySelector('#si-pin-wrap .pin-dot-input').focus();
-        switchAuthTab('signin');
-      };
-      list.appendChild(pill);
-    });
-  }
-}
-
-function signIn() {
-  var name = document.getElementById('si-name').value.trim();
-  var pin = getPin('si-pin-wrap');
-  var errEl = document.getElementById('si-error');
-  errEl.textContent = '';
-  if (!name) { errEl.textContent = 'Please enter your name.'; return; }
-  if (pin.length !== 4) { errEl.textContent = 'Enter your 4-digit PIN.'; return; }
-  var users = getUsers();
-  if (!users[name]) { errEl.textContent = 'No account found. Create one first.'; shakeInput('si-pin-wrap'); return; }
-  if (users[name] !== hashPin(pin)) { errEl.textContent = 'Incorrect PIN. Try again.'; shakeInput('si-pin-wrap'); initPinInputs('si-pin-wrap'); return; }
-  loginUser(name);
-}
-
-function createAccount() {
-  var name = document.getElementById('cr-name').value.trim();
-  var pin = getPin('cr-pin-wrap');
-  var errEl = document.getElementById('cr-error');
-  errEl.textContent = '';
-  if (!name) { errEl.textContent = 'Please choose a name.'; return; }
-  if (pin.length !== 4) { errEl.textContent = 'Choose a 4-digit PIN.'; return; }
-  var users = getUsers();
-  if (users[name]) { errEl.textContent = 'That name is taken. Sign in instead.'; return; }
-  users[name] = hashPin(pin);
-  saveUsers(users);
-  loginUser(name);
-}
-
-function shakeInput(wrapId) {
-  var wrap = document.getElementById(wrapId);
-  wrap.style.animation = 'shake 0.35s ease';
-  setTimeout(function() { wrap.style.animation = ''; }, 400);
-}
-
-function loginUser(name) {
-  currentUser = name;
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('userNameDisplay').textContent = name;
-  document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-  loadUserData();
-}
-
-function signOut() {
-  saveCurrentUserData();
-  currentUser = null;
-  items = { todo: [], remember: [], followup: [] };
-  schedule = [];
-  horizon = 'week';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('dump').value = '';
-  document.getElementById('btnText').textContent = 'Organize →';
-  document.getElementById('summaryBar').style.display = 'none';
-  document.getElementById('clearBtn').style.display = 'none';
-  document.getElementById('footer').style.display = 'none';
-  initPinInputs('si-pin-wrap');
-  initPinInputs('cr-pin-wrap');
-  loadExistingUsers();
-}
-
-function loadUserData() {
-  var data = getUserData(currentUser);
-  if (data) {
-    items = data.items || { todo: [], remember: [], followup: [] };
-    schedule = data.schedule || [];
-    if (data.summary) {
-      document.getElementById('summaryBar').textContent = '✦  ' + data.summary;
-      document.getElementById('summaryBar').style.display = 'block';
-    }
-    renderAll(null);
-  }
-}
-
-function saveCurrentUserData() {
-  if (!currentUser) return;
-  var summaryText = document.getElementById('summaryBar').textContent.replace('✦  ', '');
-  saveUserData(currentUser, { items: items, schedule: schedule, summary: summaryText });
-}
-
-/* ══════════════════════════════════════
-   APP STATE
-══════════════════════════════════════ */
-var items = { todo: [], remember: [], followup: [] };
-var schedule = [];
-var horizon = 'week';
-
-var EMPTIES = {
-  todo: 'Concrete tasks &<br>action items appear here.',
-  remember: 'Dates, context &<br>things not to forget.',
-  followup: 'Replies awaited,<br>items to check back on.'
+const RISK_DIM_META = {
+  financial:   { label: 'Financial', icon: 'M3 3v18h18 M7 14l3-3 3 3 4-5' },
+  legal:       { label: 'Legal & Compliance', icon: 'M12 3v18 M5 7h14 M7 7l-2 6h4l-2-6 M19 7l-2 6h4l-2-6' },
+  market:      { label: 'Market & Commercial', icon: 'M3 12h4l3 8 4-16 3 8h4' },
+  esg:         { label: 'ESG & Sustainability', icon: 'M12 2a9 9 0 0 0 0 18 9 9 0 0 1 0-18z M12 2a9 9 0 0 1 0 18' },
+  operational: { label: 'Operational', icon: 'M12 8v4l3 2 M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z' },
+  reputational:{ label: 'Reputational', icon: 'M12 2 3 6v6c0 5 4 8 9 10 5-2 9-5 9-10V6l-9-4z' },
 };
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + tab).classList.add('active');
-  if (tab === 'schedule') renderSchedule();
-}
+function lvl(score){ return score < 34 ? 'low' : score < 67 ? 'med' : 'high'; }
+function lvlWord(score){ return score < 34 ? 'Low' : score < 67 ? 'Moderate' : 'Elevated'; }
 
-/* ══════════════════════════════════════
-   ANALYZE
-══════════════════════════════════════ */
-async function analyze() {
-  var text = document.getElementById('dump').value.trim();
-  if (!text) return;
-  var btn = document.getElementById('analyzeBtn');
-  var spinner = document.getElementById('spinner');
-  var btnText = document.getElementById('btnText');
-  btn.disabled = true; spinner.style.display = 'block'; btnText.textContent = 'Thinking...';
-  var todayStr = new Date().toISOString().split('T')[0];
+const DEALS = [
+  {
+    id:'d1', company:'Helios Grid', sector:'Energy / Renewables', country:'Spain', stage:'Series C',
+    ticket:180, ownership:14, status:'dd', lead:'Jordan Reyes', added:'2026-05-28', risk:38,
+    thesis:'<strong>Helios Grid</strong> operates a 2.1 GW portfolio of utility-scale solar and battery-storage assets across Iberia, with contracted offtake covering 78% of capacity through 2034. The thesis rests on (a) accelerating grid-scale storage demand, (b) a de-risked, largely contracted revenue base, and (c) a proven development pipeline of 1.4 GW. We are evaluating a $180M minority growth position at a pre-money of ~$1.3B.',
+    aiSummary:`<p>Helios Grid presents a <strong>structurally attractive, lower-risk infrastructure profile</strong>. 78% of revenue is contracted under long-dated PPAs with investment-grade utilities, insulating cash flows from merchant price volatility. EBITDA margins of 61% are consistent with best-in-class operators.</p><p>The principal watch-items are <strong>refinancing exposure</strong> on €420M of project debt maturing 2028, and <strong>permitting timelines</strong> on the development pipeline that have historically slipped 6–9 months. Neither is thesis-breaking, but both warrant covenant protections.</p><p>Management is credible and aligned, with the founding team retaining 31% post-round. We see a clear path to a 2.3–2.8x gross return over a 5–6 year hold.</p>`,
+    financials:{ Revenue:'$312M', EBITDA:'$190M', 'EBITDA margin':'61%', 'Rev. growth':'+27% YoY', 'Net debt':'$640M', 'Net debt/EBITDA':'3.4x' },
+    riskBreakdown:{
+      financial:{score:42, note:'Leverage at 3.4x net debt/EBITDA; €420M refinancing wall in 2028.'},
+      legal:{score:24, note:'Clean corporate structure; all PPAs reviewed, no material disputes.'},
+      market:{score:30, note:'Contracted offtake limits merchant exposure; demand tailwinds strong.'},
+      esg:{score:18, note:'Strong sustainability profile; minor biodiversity items at two sites.'},
+      operational:{score:46, note:'Permitting timelines on pipeline have historically slipped.'},
+      reputational:{score:22, note:'No adverse media; reputable counterparties.'},
+    },
+    redFlags:[
+      {sev:'med', cat:'Financial', title:'2028 refinancing wall', detail:'€420M of project-level debt matures in 2028. Rising-rate environment could compress equity returns by 30–50bps if refinanced above current coupons. Recommend modeling a stressed refi scenario.'},
+      {sev:'med', cat:'Operational', title:'Permitting slippage on pipeline', detail:'Three of the five pipeline projects (610 MW) are pending environmental permits that have historically slipped 6–9 months in this jurisdiction. Pipeline value should be risk-weighted accordingly.'},
+      {sev:'low', cat:'ESG', title:'Biodiversity assessments outstanding', detail:'Two greenfield sites lack completed biodiversity impact assessments. Low materiality but required before construction financing.'},
+    ],
+    docs:[
+      {name:'Helios — Financial Model 2024-2030.xlsx', type:'xls', size:'4.2 MB', status:'analyzed',
+       summary:'Five-year operating model with contracted vs. merchant revenue split, debt schedule, and DCF. Base case implies 2.4x gross MOIC. Assumptions are reasonable; merchant price deck is conservative.',
+       findings:[{t:'pos',x:'Contracted revenue covers 78% of projected cash flows through 2034.'},{t:'neg',x:'€420M refinancing in 2028 modeled at flat coupon — likely optimistic.'},{t:'neu',x:'DCF uses a 7.8% WACC; sensitivity table included for ±150bps.'}],
+       extracted:{ 'Base MOIC':'2.4x', IRR:'18.6%', 'Exit yr':'2031', 'Refi gap':'€420M' }},
+      {name:'Project Helios — IM (Confidential).pdf', type:'pdf', size:'8.9 MB', status:'analyzed',
+       summary:'Information memorandum covering asset portfolio, offtake contracts, development pipeline, and management bios. Well-structured; offtake counterparties are investment-grade.',
+       findings:[{t:'pos',x:'Offtake counterparties carry an average rating of A-.'},{t:'pos',x:'Founding team retains 31% ownership post-transaction.'},{t:'neu',x:'1.4 GW development pipeline detailed with per-project status.'}],
+       extracted:{ Capacity:'2.1 GW', Pipeline:'1.4 GW', 'Avg PPA':'9.2 yrs', Offtake:'78%' }},
+      {name:'Legal DD — Q&A Tracker.docx', type:'doc', size:'1.1 MB', status:'pending'},
+    ],
+  },
+  {
+    id:'d2', company:'Northwind Logistics', sector:'Transport / Supply Chain', country:'Germany', stage:'Buyout',
+    ticket:340, ownership:65, status:'ic', lead:'Priya Anand', added:'2026-05-19', risk:54,
+    thesis:'<strong>Northwind Logistics</strong> is a pan-European last-mile and cold-chain operator with 2,400 vehicles and 38 distribution hubs. The control-buyout thesis targets margin expansion through fleet electrification, route-density optimization, and a roll-up of regional competitors. Entry at 7.8x EBITDA.',
+    aiSummary:`<p>Northwind is a <strong>solid operational asset with a clear value-creation plan</strong>, but the deal carries <strong>meaningfully higher risk</strong> than the rest of the pipeline. Customer concentration is the central concern: the top three accounts represent 41% of revenue, and the largest contract (19% of revenue) is up for renewal in 14 months.</p><p>The electrification capex plan (€95M over 3 years) is credible but depends on subsidy timelines that are not yet confirmed. Working-capital seasonality is pronounced and the current model under-reserves for it.</p><p>We would proceed only with (a) a renewal commitment or price protection on the anchor contract, and (b) a revised capex contingency. Absent these, risk-adjusted returns fall below hurdle.</p>`,
+    financials:{ Revenue:'$880M', EBITDA:'$132M', 'EBITDA margin':'15%', 'Rev. growth':'+9% YoY', 'Net debt':'$310M', 'Entry mult.':'7.8x' },
+    riskBreakdown:{
+      financial:{score:52, note:'Cyclical margins; working-capital swings under-reserved in model.'},
+      legal:{score:38, note:'Employment liabilities in two jurisdictions under review.'},
+      market:{score:64, note:'Customer concentration: top 3 = 41% of revenue.'},
+      esg:{score:48, note:'Diesel fleet; electrification plan dependent on subsidies.'},
+      operational:{score:58, note:'Integration/roll-up execution risk is high.'},
+      reputational:{score:34, note:'One historical labor dispute, since resolved.'},
+    },
+    redFlags:[
+      {sev:'high', cat:'Commercial', title:'Anchor customer renewal risk', detail:'The largest customer (19% of revenue) has a contract expiring in 14 months with no renewal commitment. Loss would breach the base-case EBITDA by ~12%. This is the single most material risk in the deal.'},
+      {sev:'med', cat:'Financial', title:'Working-capital seasonality under-modeled', detail:'Peak-season working-capital draw historically reaches €60M; the model reserves only €38M, overstating distributable cash in Q4.'},
+      {sev:'med', cat:'Operational', title:'Roll-up integration execution', detail:'The thesis assumes three bolt-on acquisitions in 24 months. Management has not previously integrated acquisitions of this scale; synergy timeline appears aggressive.'},
+      {sev:'low', cat:'Legal', title:'Employment liability review pending', detail:'Outstanding works-council obligations in Germany and France being quantified by counsel; preliminary estimate €4–7M.'},
+    ],
+    docs:[
+      {name:'Northwind — VDD Report (EY).pdf', type:'pdf', size:'12.4 MB', status:'analyzed',
+       summary:'Vendor due diligence covering financials, tax, and operations. Quality of earnings adjusts reported EBITDA down by 6% for normalizations. Customer concentration flagged prominently.',
+       findings:[{t:'neg',x:'QoE reduces adjusted EBITDA by 6% vs. management figures.'},{t:'neg',x:'Top 3 customers represent 41% of revenue — concentration risk.'},{t:'neu',x:'Tax structure is clean across all operating jurisdictions.'}],
+       extracted:{ 'Adj. EBITDA':'$124M', 'Concentration':'41%', 'QoE adj.':'-6%', Hubs:'38' }},
+      {name:'Fleet Electrification Capex Plan.xlsx', type:'xls', size:'2.8 MB', status:'analyzed',
+       summary:'Three-year €95M electrification program with per-hub rollout. Subsidy assumptions account for 28% of funding but are not yet confirmed with authorities.',
+       findings:[{t:'neg',x:'28% of capex funding assumes unconfirmed government subsidies.'},{t:'pos',x:'Payback on electrified routes is 4.1 years at current energy prices.'},{t:'neu',x:'Phased rollout reduces upfront capital exposure.'}],
+       extracted:{ 'Total capex':'€95M', 'Subsidy %':'28%', Payback:'4.1 yr', Horizon:'3 yr' }},
+      {name:'Customer Contract Summary.pdf', type:'pdf', size:'3.3 MB', status:'pending'},
+    ],
+  },
+  {
+    id:'d3', company:'Veridian Bio', sector:'Healthcare / Biotech', country:'United States', stage:'Series B',
+    ticket:75, ownership:9, status:'screening', lead:'Marcus Bell', added:'2026-06-06', risk:71,
+    thesis:'<strong>Veridian Bio</strong> is a clinical-stage biotech developing a Phase II oncology asset (VRD-114). High-risk, high-reward venture position. Thesis is binary on the Phase II readout expected in Q4 2026.',
+    aiSummary:`<p>Veridian is an <strong>early-stage, high-variance opportunity</strong> whose value is dominated by a single binary catalyst — the VRD-114 Phase II readout in Q4 2026. The preclinical and Phase I data are encouraging, with a differentiated mechanism, but the probability-weighted outcome remains highly uncertain.</p><p>Cash runway extends only to Q1 2027, meaning a successful readout must be quickly followed by a financing. IP position is defensible but faces one pending opposition in Europe.</p><p>This is appropriately sized as a small venture ticket. It should not be evaluated on conventional return metrics — it is a probabilistic bet, and we recommend it only within a diversified venture sleeve.</p>`,
+    financials:{ Revenue:'$0', 'Cash':'$48M', 'Burn rate':'$3.1M/mo', Runway:'to Q1 2027', 'Last round':'$30M', 'Post-money':'$420M' },
+    riskBreakdown:{
+      financial:{score:78, note:'Pre-revenue; runway only to Q1 2027, financing required.'},
+      legal:{score:52, note:'Pending patent opposition in Europe on core IP.'},
+      market:{score:66, note:'Large TAM but contingent on clinical success.'},
+      esg:{score:30, note:'Standard clinical-trial governance; no major concerns.'},
+      operational:{score:60, note:'Small team; key-person dependency on CSO.'},
+      reputational:{score:40, note:'Founder previously wound down a prior venture.'},
+    },
+    redFlags:[
+      {sev:'high', cat:'Clinical', title:'Binary Phase II readout', detail:'Substantially all enterprise value is contingent on the VRD-114 Phase II readout (Q4 2026). Trial failure would likely impair the position by 80–90%. This is an irreducible, thesis-defining risk.'},
+      {sev:'high', cat:'Financial', title:'Runway shorter than catalyst buffer', detail:'Cash runway extends to Q1 2027, leaving minimal buffer after the Q4 2026 readout. A delayed trial or slow post-readout financing creates acute funding risk.'},
+      {sev:'med', cat:'Legal / IP', title:'European patent opposition', detail:'A competitor has filed an opposition against the core composition-of-matter patent at the EPO. Counsel assesses a moderate likelihood of partial claim amendment.'},
+      {sev:'low', cat:'Governance', title:'Key-person dependency', detail:'The scientific program is highly dependent on the founding CSO; no formal succession or retention package is in place.'},
+    ],
+    docs:[
+      {name:'VRD-114 Phase I Clinical Data.pdf', type:'pdf', size:'6.7 MB', status:'analyzed',
+       summary:'Phase I safety and dose-escalation data. Favorable tolerability with two partial responses observed at higher doses. Sample size is small (n=24); efficacy signal is preliminary.',
+       findings:[{t:'pos',x:'Favorable safety profile; no dose-limiting toxicities at target dose.'},{t:'pos',x:'Two partial responses observed — early efficacy signal.'},{t:'neg',x:'Small sample (n=24) limits statistical confidence.'}],
+       extracted:{ Phase:'I → II', 'Sample n':'24', Responses:'2 PR', 'Readout':'Q4 2026' }},
+      {name:'IP Portfolio & Freedom-to-Operate.pdf', type:'pdf', size:'2.1 MB', status:'pending'},
+    ],
+  },
+  {
+    id:'d4', company:'Atlas Data Centers', sector:'Infrastructure / Digital', country:'United Kingdom', stage:'Growth',
+    ticket:260, ownership:22, status:'dd', lead:'Jordan Reyes', added:'2026-06-01', risk:33,
+    thesis:'<strong>Atlas Data Centers</strong> develops and operates hyperscale data-center capacity with 220 MW live and 480 MW under construction, anchored by long-term leases with two hyperscale tenants. Stable, inflation-linked, contracted cash flows.',
+    aiSummary:`<p>Atlas is the <strong>lowest-risk opportunity currently in the pipeline</strong>. 92% of live capacity is leased to two investment-grade hyperscalers under 12–15 year inflation-linked contracts, producing highly visible, annuity-like cash flows.</p><p>The principal risk is <strong>concentration in two tenants</strong> and <strong>power-availability constraints</strong> on the development pipeline — securing grid connections in the UK has lengthened to 4–6 years. Construction is well-managed and on budget.</p><p>This is a high-conviction, core-plus infrastructure position. We see a clear path to a 2.0–2.4x return with strong downside protection.</p>`,
+    financials:{ Revenue:'$240M', EBITDA:'$168M', 'EBITDA margin':'70%', 'Rev. growth':'+34% YoY', 'Net debt':'$520M', 'Lease term':'13.4 yrs' },
+    riskBreakdown:{
+      financial:{score:34, note:'High leverage offset by contracted, inflation-linked income.'},
+      legal:{score:20, note:'Leases reviewed; clean title across all sites.'},
+      market:{score:28, note:'Structural demand growth; concentration in two tenants.'},
+      esg:{score:44, note:'High power draw; PPAs cover 60% from renewables.'},
+      operational:{score:38, note:'Grid-connection timelines lengthening in the UK.'},
+      reputational:{score:18, note:'Blue-chip tenants; strong industry standing.'},
+    },
+    redFlags:[
+      {sev:'med', cat:'Commercial', title:'Two-tenant concentration', detail:'92% of contracted revenue derives from two hyperscale tenants. While both are investment-grade with long-dated leases, the loss or non-renewal of either would be highly material.'},
+      {sev:'med', cat:'Operational', title:'Grid-connection timelines', detail:'UK grid-connection queues have extended to 4–6 years, creating timing risk for the 480 MW development pipeline. Two sites have secured connections; the remainder are in the queue.'},
+      {sev:'low', cat:'ESG', title:'Power-source mix', detail:'Only 60% of power is covered by renewable PPAs. Tenant sustainability requirements may necessitate accelerating the renewable transition, with associated cost.'},
+    ],
+    docs:[
+      {name:'Atlas — Lease Portfolio Summary.pdf', type:'pdf', size:'5.5 MB', status:'analyzed',
+       summary:'Summary of all tenant leases including term, escalators, and break clauses. Weighted-average lease term of 13.4 years with CPI-linked escalators. No near-term breaks.',
+       findings:[{t:'pos',x:'WALT of 13.4 years with CPI-linked rent escalators.'},{t:'pos',x:'No tenant break options exercisable before 2032.'},{t:'neg',x:'92% of income concentrated in two tenants.'}],
+       extracted:{ WALT:'13.4 yr', Leased:'92%', Tenants:'2', Escalator:'CPI' }},
+      {name:'Construction Budget & Schedule.xlsx', type:'xls', size:'3.9 MB', status:'analyzed',
+       summary:'480 MW pipeline construction tracker. On budget and broadly on schedule; two sites face grid-connection timing risk. Contingency of 8% appears adequate.',
+       findings:[{t:'pos',x:'Construction is on budget with an 8% contingency reserve.'},{t:'neg',x:'Two pipeline sites pending grid connections (4–6 yr UK queue).'},{t:'neu',x:'Phased commissioning aligns capacity with pre-let demand.'}],
+       extracted:{ 'Under constr.':'480 MW', Live:'220 MW', Contingency:'8%', 'On budget':'Yes' }},
+    ],
+  },
+  {
+    id:'d5', company:'Meridian Payments', sector:'Financial Services / Fintech', country:'Singapore', stage:'Series D',
+    ticket:120, ownership:7, status:'approved', lead:'Priya Anand', added:'2026-04-22', risk:45,
+    thesis:'<strong>Meridian Payments</strong> is a Southeast-Asian cross-border payments and treasury platform processing $42B annualized volume. Approved by IC for a $120M growth position; closing in progress.',
+    aiSummary:`<p>Meridian was <strong>approved by the Investment Committee</strong> following a comprehensive diligence process. The platform demonstrates strong network effects, 118% net revenue retention, and a defensible regulatory moat across seven licensed markets.</p><p>Residual risks centre on <strong>regulatory complexity</strong> across multiple jurisdictions and <strong>FX/treasury exposure</strong> inherent to the business model, both of which are well-managed by an experienced team. Approved with standard governance and information-rights protections.</p>`,
+    financials:{ Revenue:'$210M', EBITDA:'$31M', 'EBITDA margin':'15%', 'Rev. growth':'+58% YoY', 'TPV':'$42B', 'Net rev. retention':'118%' },
+    riskBreakdown:{
+      financial:{score:40, note:'Early profitability; strong growth and retention.'},
+      legal:{score:50, note:'Operates under 7 licenses; regulatory complexity high.'},
+      market:{score:36, note:'Strong network effects; competitive but expanding market.'},
+      esg:{score:32, note:'Robust AML/KYC controls; standard governance.'},
+      operational:{score:42, note:'Scaling operations; treasury/FX risk managed.'},
+      reputational:{score:38, note:'Clean record; one minor regulatory inquiry closed.'},
+    },
+    redFlags:[
+      {sev:'med', cat:'Regulatory', title:'Multi-jurisdiction licensing', detail:'Operating under seven separate payment/e-money licenses creates ongoing compliance complexity and exposure to regulatory change in any single market.'},
+      {sev:'low', cat:'Financial', title:'FX and treasury exposure', detail:'The cross-border model carries inherent FX and settlement exposure. Hedging policy is robust but represents an ongoing operational dependency.'},
+    ],
+    docs:[
+      {name:'Meridian — IC Memo (Final).pdf', type:'pdf', size:'4.0 MB', status:'analyzed',
+       summary:'Final investment committee memorandum. Recommends proceeding at $120M for a 7% stake. Approved unanimously with standard protections.',
+       findings:[{t:'pos',x:'118% net revenue retention demonstrates strong product stickiness.'},{t:'pos',x:'Licensed in 7 markets — meaningful regulatory moat.'},{t:'neu',x:'Approved with information rights and a board observer seat.'}],
+       extracted:{ Stake:'7%', Ticket:'$120M', TPV:'$42B', NRR:'118%' }},
+      {name:'Regulatory Licenses Overview.xlsx', type:'xls', size:'1.6 MB', status:'analyzed',
+       summary:'Matrix of all operating licenses by jurisdiction with renewal dates and compliance status. All current; two renewals due within 18 months.',
+       findings:[{t:'pos',x:'All 7 licenses current and in good standing.'},{t:'neu',x:'Two license renewals due within 18 months.'},{t:'neu',x:'Dedicated compliance team of 22 across markets.'}],
+       extracted:{ Licenses:'7', Markets:'7', 'Renewals <18m':'2', Compliance:'22' }},
+    ],
+  },
+  {
+    id:'d6', company:'Terra Agritech', sector:'Agriculture / Climate', country:'Brazil', stage:'Series B',
+    ticket:55, ownership:11, status:'screening', lead:'Marcus Bell', added:'2026-06-10', risk:58,
+    thesis:'<strong>Terra Agritech</strong> provides precision-agriculture software and soil-carbon measurement to large row-crop farms across Latin America. Early screening; assessing unit economics and carbon-credit revenue durability.',
+    aiSummary:`<p>Terra addresses a <strong>large and policy-tailwinded market</strong>, combining a SaaS layer with carbon-credit origination. The software metrics are promising, but the <strong>carbon-credit revenue line is the key uncertainty</strong> — methodology, verification, and price durability all carry real risk given an evolving voluntary-market backdrop.</p><p>Customer acquisition economics are improving but remain unproven at scale, and FX/country exposure in the core Brazilian market adds volatility. This is at an early screening stage; a deeper review of carbon-revenue assumptions is the logical next step before committing diligence resources.</p>`,
+    financials:{ Revenue:'$18M', 'ARR':'$22M', 'Gross margin':'74%', 'Rev. growth':'+91% YoY', 'Cash':'$26M', 'Carbon rev. %':'34%' },
+    riskBreakdown:{
+      financial:{score:60, note:'High growth but reliant on volatile carbon revenue.'},
+      legal:{score:48, note:'Carbon methodology and verification carry compliance risk.'},
+      market:{score:54, note:'Large TAM; carbon-credit price durability uncertain.'},
+      esg:{score:36, note:'Positive climate impact; verification rigor must be confirmed.'},
+      operational:{score:56, note:'CAC improving but unproven at scale.'},
+      reputational:{score:50, note:'Greenwashing scrutiny risk inherent to carbon claims.'},
+    },
+    redFlags:[
+      {sev:'high', cat:'Revenue Quality', title:'Carbon-credit revenue durability', detail:'34% of revenue derives from carbon-credit origination, exposed to voluntary-market price volatility and evolving methodology standards. A repricing or methodology change could impair a third of revenue.'},
+      {sev:'med', cat:'Market', title:'Country & FX concentration', detail:'The majority of revenue is generated in Brazil, exposing the position to BRL volatility and local policy shifts affecting agriculture and carbon markets.'},
+      {sev:'med', cat:'Unit Economics', title:'CAC payback unproven at scale', detail:'Customer-acquisition payback has improved to ~16 months but is based on a limited cohort. Scalability of the go-to-market motion is not yet demonstrated.'},
+    ],
+    docs:[
+      {name:'Terra — Pitch Deck v6.pdf', type:'ppt', size:'14.2 MB', status:'analyzed',
+       summary:'Series B pitch deck covering product, market, traction, and carbon-revenue model. Strong growth narrative; carbon-revenue assumptions are optimistic and lightly substantiated.',
+       findings:[{t:'pos',x:'91% YoY revenue growth with 74% gross margins on the SaaS line.'},{t:'neg',x:'Carbon-credit price assumptions appear optimistic vs. spot markets.'},{t:'neu',x:'Expansion into Argentina and Paraguay planned for 2027.'}],
+       extracted:{ ARR:'$22M', Growth:'+91%', 'Carbon %':'34%', 'GM':'74%' }},
+      {name:'Carbon Methodology Whitepaper.pdf', type:'pdf', size:'3.4 MB', status:'pending'},
+    ],
+  },
+  {
+    id:'d7', company:'Cobalt Robotics', sector:'Industrials / Automation', country:'Japan', stage:'Growth',
+    ticket:95, ownership:13, status:'hold', lead:'Jordan Reyes', added:'2026-05-02', risk:49,
+    thesis:'<strong>Cobalt Robotics</strong> manufactures autonomous warehouse and fulfilment robots. Diligence placed on hold pending clarification of a key supply-chain dependency and updated order backlog.',
+    aiSummary:`<p>Cobalt has <strong>strong technology and a credible order book</strong>, but diligence was <strong>paused</strong> pending two unresolved items: a single-source dependency on a critical actuator component, and a request for updated backlog figures after a large customer signaled a possible order deferral.</p><p>The underlying business is sound and the team is strong. We recommend resuming diligence once the supply-chain concentration is clarified and the revised backlog is received. Until then, the risk picture cannot be finalized.</p>`,
+    financials:{ Revenue:'$140M', EBITDA:'$12M', 'EBITDA margin':'9%', 'Rev. growth':'+41% YoY', 'Backlog':'$210M', 'Cash':'$60M' },
+    riskBreakdown:{
+      financial:{score:46, note:'Thin margins; scaling toward profitability.'},
+      legal:{score:34, note:'IP portfolio strong; no material disputes.'},
+      market:{score:42, note:'Growing automation demand; competitive intensity rising.'},
+      esg:{score:30, note:'Low environmental footprint; standard governance.'},
+      operational:{score:68, note:'Single-source actuator dependency is a key concern.'},
+      reputational:{score:32, note:'Well-regarded; no adverse media.'},
+    },
+    redFlags:[
+      {sev:'high', cat:'Supply Chain', title:'Single-source critical component', detail:'A critical actuator is single-sourced from one supplier with no qualified second source. A disruption would halt production. This is the primary reason diligence is on hold.'},
+      {sev:'med', cat:'Commercial', title:'Potential order deferral', detail:'A large customer has signaled a possible deferral of a $40M order. Updated backlog figures have been requested before diligence resumes.'},
+    ],
+    docs:[
+      {name:'Cobalt — Supply Chain Map.xlsx', type:'xls', size:'2.2 MB', status:'analyzed',
+       summary:'Bill-of-materials and supplier mapping. Identifies the single-source actuator dependency and lead-time exposure. No qualified alternate supplier currently listed.',
+       findings:[{t:'neg',x:'Critical actuator is single-sourced with a 16-week lead time.'},{t:'neu',x:'Remaining BOM is dual-sourced across the supplier base.'},{t:'neu',x:'Qualification of a second actuator source estimated at 6–9 months.'}],
+       extracted:{ 'Single-source':'1 critical', 'Lead time':'16 wk', BOM:'Mapped', 'Alt source':'None' }},
+      {name:'Order Backlog (as of Apr).pdf', type:'pdf', size:'1.4 MB', status:'pending'},
+    ],
+  },
+  {
+    id:'d8', company:'Lumen Education', sector:'Education / Technology', country:'India', stage:'Series C',
+    ticket:65, ownership:8, status:'declined', lead:'Marcus Bell', added:'2026-03-30', risk:74,
+    thesis:'<strong>Lumen Education</strong> operates a K-12 online tutoring marketplace. Diligence concluded with a recommendation to decline due to deteriorating unit economics and governance concerns.',
+    aiSummary:`<p>Diligence on Lumen concluded with a <strong>recommendation to decline</strong>. While top-line growth was strong, the underlying unit economics deteriorated through the diligence period: customer-acquisition costs rose faster than lifetime value, and retention cohorts weakened materially.</p><p>More decisively, <strong>governance and related-party concerns</strong> emerged — including undisclosed transactions with founder-affiliated entities — that the authority deemed inconsistent with its standards. These findings, taken together, fell below our investability threshold.</p>`,
+    financials:{ Revenue:'$90M', EBITDA:'-$22M', 'EBITDA margin':'-24%', 'Rev. growth':'+62% YoY', 'CAC payback':'31 mo', 'Cash':'$40M' },
+    riskBreakdown:{
+      financial:{score:76, note:'Deeply loss-making; CAC payback deteriorating.'},
+      legal:{score:68, note:'Undisclosed related-party transactions identified.'},
+      market:{score:58, note:'Crowded market; differentiation weakening.'},
+      esg:{score:46, note:'Data-privacy practices for minors require scrutiny.'},
+      operational:{score:62, note:'High churn; retention cohorts deteriorating.'},
+      reputational:{score:70, note:'Governance concerns create reputational exposure.'},
+    },
+    redFlags:[
+      {sev:'high', cat:'Governance', title:'Undisclosed related-party transactions', detail:'Diligence identified material transactions with founder-affiliated entities that were not disclosed in the data room. This is a decisive governance concern and a primary basis for declining.'},
+      {sev:'high', cat:'Financial', title:'Deteriorating unit economics', detail:'CAC payback extended to 31 months during diligence while retention cohorts weakened, indicating an unsustainable growth model at current spend levels.'},
+      {sev:'med', cat:'Data Privacy', title:'Handling of minors\' data', detail:'Data-protection practices for K-12 users were found to be below the standard expected for processing minors\' personal data, creating regulatory and reputational exposure.'},
+    ],
+    docs:[
+      {name:'Lumen — Cohort & Retention Analysis.xlsx', type:'xls', size:'3.1 MB', status:'analyzed',
+       summary:'Cohort retention and unit-economics analysis. Shows deteriorating retention across recent cohorts and lengthening CAC payback. Contradicts the blended figures in the pitch materials.',
+       findings:[{t:'neg',x:'Recent cohorts retain 40% worse at month 12 than 2024 cohorts.'},{t:'neg',x:'CAC payback extended from 18 to 31 months over four quarters.'},{t:'neu',x:'Blended metrics in the deck masked the cohort deterioration.'}],
+       extracted:{ 'CAC payback':'31 mo', 'M12 churn':'High', 'Trend':'Worsening', LTV:'Declining' }},
+      {name:'Related-Party Disclosure Review.pdf', type:'pdf', size:'2.7 MB', status:'analyzed',
+       summary:'Review of related-party transactions. Identifies several undisclosed dealings with founder-affiliated entities, raising material governance concerns.',
+       findings:[{t:'neg',x:'Multiple undisclosed founder-affiliated transactions identified.'},{t:'neg',x:'Procurement routed through a related entity at above-market rates.'},{t:'neu',x:'Findings referred to the investment committee for decision.'}],
+       extracted:{ 'RPTs found':'Several', Disclosed:'No', Decision:'Decline', Severity:'High' }},
+    ],
+  },
+];
+
+const STATUS_META = {
+  screening:{ label:'Screening', cls:'b-screening' },
+  dd:{ label:'In Diligence', cls:'b-dd' },
+  ic:{ label:'IC Review', cls:'b-ic' },
+  approved:{ label:'Approved', cls:'b-approved' },
+  declined:{ label:'Declined', cls:'b-declined' },
+  hold:{ label:'On Hold', cls:'b-hold' },
+};
+
+/* ---------- state ---------- */
+let state = {
+  view: 'dashboard',
+  dealId: null,
+  dealTab: 'overview',
+  filter: 'all',
+  search: '',
+  reports: {},   // dealId -> report html
+};
+
+/* ---------- persistence ---------- */
+function loadState(){
   try {
-    var response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514", max_tokens: 1800,
-        system: 'You are a personal productivity assistant. Today is ' + todayStr + '. Read a brain dump and classify items into todo/remember/followup. For todo and followup, assign a scheduleDate. Return ONLY valid JSON:\n{\n  "summary": "one warm encouraging sentence max 18 words",\n  "todo": [{ "title": "...", "priority": "high|medium|low", "note": "optional max 8 words", "time": "est.", "scheduleDate": "YYYY-MM-DD" }],\n  "remember": [{ "title": "...", "priority": "high|medium|low", "note": "optional max 8 words" }],\n  "followup": [{ "title": "...", "priority": "high|medium|low", "note": "optional max 8 words", "scheduleDate": "YYYY-MM-DD" }]\n}\nCategories: todo=active tasks you do, remember=passive awareness, followup=waiting on others.\nScheduling: high→today/tomorrow, medium→this week, low→next week. Max 4 items/day. Note optional. Sort by priority. Max 8 items/category.',
-        messages: [{ role: "user", content: 'Today: ' + todayStr + '\nBrain dump:\n' + text }]
-      })
-    });
-    var data = await response.json();
-    var raw = data.content.map(b => b.text || '').join('');
-    var parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
-    items.todo = (parsed.todo || []).map((t, i) => ({ ...t, id: 'todo-' + i, done: false }));
-    items.remember = (parsed.remember || []).map((t, i) => ({ ...t, id: 'remember-' + i, done: false }));
-    items.followup = (parsed.followup || []).map((t, i) => ({ ...t, id: 'followup-' + i, done: false }));
-    schedule = [];
-    [...items.todo, ...items.followup].forEach(item => {
-      if (item.scheduleDate) schedule.push({ itemId: item.id, day: item.scheduleDate });
-    });
-    renderAll(parsed.summary);
-    saveCurrentUserData();
-  } catch(e) {
-    console.error(e);
-    ['todo','remember','followup'].forEach(cat => {
-      document.getElementById('cards-' + cat).innerHTML = '<div class="col-empty">Something went wrong.<br>Try again.</div>';
-    });
-  }
-  btn.disabled = false; spinner.style.display = 'none'; btnText.textContent = 'Re-organize →';
+    const s = JSON.parse(localStorage.getItem('aegis_state')||'{}');
+    if (s.reports) state.reports = s.reports;
+    // hydrate doc analysis flags
+    const docFlags = JSON.parse(localStorage.getItem('aegis_docs')||'{}');
+    DEALS.forEach(d=>d.docs.forEach(doc=>{ if(docFlags[d.id+':'+doc.name]) doc.status='analyzed'; }));
+  } catch(e){}
+}
+function saveReports(){ localStorage.setItem('aegis_state', JSON.stringify({reports:state.reports})); }
+function saveDocFlags(){
+  const f={}; DEALS.forEach(d=>d.docs.forEach(doc=>{ if(doc.status==='analyzed' && doc.summary) f[d.id+':'+doc.name]=1; }));
+  localStorage.setItem('aegis_docs', JSON.stringify(f));
 }
 
-/* ══════════════════════════════════════
-   RENDER
-══════════════════════════════════════ */
-function renderAll(summary) {
-  if (summary) {
-    var bar = document.getElementById('summaryBar');
-    bar.textContent = '✦  ' + summary;
-    bar.style.display = 'block';
-  }
-  ['todo','remember','followup'].forEach(cat => renderColumn(cat));
-  document.getElementById('clearBtn').style.display = 'inline-flex';
-  document.getElementById('footer').style.display = 'flex';
-  updateProgress(); updateBadges();
+/* ---------- auth ---------- */
+let authMode='signin';
+function setAuthMode(m){
+  authMode=m;
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===m));
+  document.getElementById('nameField').style.display = m==='signup'?'block':'none';
+  document.getElementById('authTitle').textContent = m==='signup'?'Create your account':'Welcome back';
+  document.getElementById('authSub').textContent = m==='signup'?'Set up your diligence workspace':'Sign in to your diligence workspace';
+  document.getElementById('authBtn').textContent = m==='signup'?'Create account':'Sign in';
+}
+function doAuth(e){
+  e.preventDefault();
+  const email=document.getElementById('authEmail').value.trim()||'analyst@authority.gov';
+  const name=(document.getElementById('authName').value.trim()) || (authMode==='signup'?'New Analyst': 'Jordan Reyes');
+  const user={ name, email };
+  localStorage.setItem('aegis_user', JSON.stringify(user));
+  enterApp(user);
+}
+function enterApp(user){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('userName').textContent=user.name;
+  document.getElementById('userAvatar').textContent=initials(user.name);
+  loadState();
+  go('dashboard');
+}
+function logout(){
+  localStorage.removeItem('aegis_user');
+  document.getElementById('app').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
 }
 
-function renderColumn(cat) {
-  var container = document.getElementById('cards-' + cat);
-  var countEl = document.getElementById('count-' + cat);
-  var list = items[cat];
-  if (!list.length) {
-    container.innerHTML = '<div class="col-empty">Nothing here —<br>you\'re clear!</div>';
-    countEl.style.display = 'none'; return;
-  }
-  countEl.textContent = list.length; countEl.style.display = 'inline-block';
-  container.innerHTML = '';
-  list.forEach(function(item, i) {
-    var card = document.createElement('div');
-    card.className = 'card' + (item.done ? ' done' : '');
-    card.style.animationDelay = (i * 0.04) + 's';
-    card.dataset.id = item.id;
-    card.onclick = function() { toggleItem(cat, item.id); };
-    var showTime = item.time && cat === 'todo';
-    var showSched = item.scheduleDate && (cat === 'todo' || cat === 'followup');
-    card.innerHTML = '<div class="card-checkbox"><svg width="7" height="5" viewBox="0 0 7 5" fill="none"><path d="M1 2.5L2.8 4.2L6 1" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="card-body"><div class="card-title">' + item.title + '</div>' + (item.note ? '<div class="card-note">' + item.note + '</div>' : '') + '<div class="card-meta"><span class="priority-dot ' + item.priority + '"></span><span class="card-tag">' + item.priority + '</span>' + (showTime ? '<span class="card-time">' + item.time + '</span>' : '') + (showSched ? '<span class="card-scheduled">' + formatLabel(item.scheduleDate) + '</span>' : '') + '</div></div>';
-    container.appendChild(card);
-  });
+/* ---------- nav / routing ---------- */
+function go(view, dealId){
+  state.view=view;
+  if(dealId!==undefined) state.dealId=dealId;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===view));
+  if(view==='deal'){ document.querySelector('.nav-item[data-view="pipeline"]').classList.add('active'); }
+  render();
+  document.querySelector('.main').scrollTop=0; window.scrollTo(0,0);
 }
 
-function formatLabel(dateStr) {
-  var today = new Date(); today.setHours(0,0,0,0);
-  var d = new Date(dateStr + 'T00:00:00');
-  var diff = Math.round((d - today) / 86400000);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  if (diff < 0) return 'Overdue';
-  if (diff < 7) return d.toLocaleDateString('en-US', { weekday: 'short' });
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function setCrumb(html){ document.getElementById('crumb').innerHTML=html; }
+function updateNavCounts(){
+  document.getElementById('navPipelineCount').textContent=DEALS.length;
+  document.getElementById('navReportsCount').textContent=Object.keys(state.reports).length;
 }
 
-function setHorizon(h) {
-  horizon = h;
-  document.querySelectorAll('.horizon-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('ht-' + h).classList.add('active');
-  renderSchedule();
+function onSearch(v){ state.search=v.toLowerCase(); if(state.view==='pipeline'||state.view==='dashboard') render(); }
+
+/* ---------- render dispatch ---------- */
+function render(){
+  updateNavCounts();
+  const c=document.getElementById('content');
+  if(state.view==='dashboard'){ setCrumb('<b>Dashboard</b>'); c.innerHTML=renderDashboard(); }
+  else if(state.view==='pipeline'){ setCrumb('<b>Deal Pipeline</b>'); c.innerHTML=renderPipeline(); }
+  else if(state.view==='deal'){ const d=getDeal(); setCrumb('Pipeline / <b>'+d.company+'</b>'); c.innerHTML=renderDeal(d); afterDealRender(d); }
+  else if(state.view==='reports'){ setCrumb('<b>DD Reports</b>'); c.innerHTML=renderReports(); }
+  else if(state.view==='risk'){ setCrumb('<b>Risk Monitor</b>'); c.innerHTML=renderRiskMonitor(); }
+}
+function getDeal(){ return DEALS.find(d=>d.id===state.dealId); }
+
+/* ---------- dashboard ---------- */
+function fmtUSD(m){ return m>=1000? '$'+(m/1000).toFixed(1)+'B' : '$'+m+'M'; }
+function renderDashboard(){
+  const active=DEALS.filter(d=>['screening','dd','ic'].includes(d.status));
+  const totalCapital=DEALS.reduce((s,d)=>s+d.ticket,0);
+  const inDD=DEALS.filter(d=>d.status==='dd').length;
+  const avgRisk=Math.round(DEALS.reduce((s,d)=>s+d.risk,0)/DEALS.length);
+  const highRisk=DEALS.filter(d=>d.risk>=67).length;
+  const recent=[...DEALS].sort((a,b)=>b.added.localeCompare(a.added)).slice(0,5);
+
+  return `
+  <div class="page-head"><div class="page-title serif">Diligence Dashboard</div>
+    <div class="page-desc">Live overview of the Investment Authority's evaluation pipeline.</div></div>
+
+  <div class="stat-grid">
+    <div class="card stat"><div class="stat-label">Active Evaluations</div>
+      <div class="stat-value">${active.length}<span class="unit"> / ${DEALS.length}</span></div>
+      <div class="stat-sub up">${inDD} in active diligence</div>
+      <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M6 12h12M10 18h4"/></svg></div>
+    <div class="card stat"><div class="stat-label">Capital Under Review</div>
+      <div class="stat-value">${fmtUSD(totalCapital)}</div>
+      <div class="stat-sub">Across ${DEALS.length} opportunities</div>
+      <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+    <div class="card stat"><div class="stat-label">Portfolio Risk Index</div>
+      <div class="stat-value lvl-${lvl(avgRisk)}">${avgRisk}<span class="unit">/100</span></div>
+      <div class="stat-sub ${avgRisk<50?'up':'down'}">${lvlWord(avgRisk)} aggregate risk</div>
+      <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+    <div class="card stat"><div class="stat-label">Elevated-Risk Deals</div>
+      <div class="stat-value lvl-high">${highRisk}</div>
+      <div class="stat-sub">Require committee attention</div>
+      <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m21.7 16.5-9-15a2 2 0 0 0-3.4 0l-9 15A2 2 0 0 0 3 19h18a2 2 0 0 0 1.7-2.5z"/></svg></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card panel">
+      <div class="panel-head"><div class="panel-title serif">Recently updated</div>
+        <button class="btn btn-ghost btn-sm" onclick="go('pipeline')">View all</button></div>
+      <table class="deal-table"><tbody>
+        ${recent.map(d=>dealRow(d, DEALS.indexOf(d), true)).join('')}
+      </tbody></table>
+    </div>
+    <div class="card panel">
+      <div class="panel-head"><div class="panel-title serif">Pipeline by stage</div></div>
+      ${stageBars()}
+      <div class="section-gap"></div>
+      <div class="panel-title sm serif" style="margin-bottom:0.8rem">Sector exposure</div>
+      ${sectorBars()}
+    </div>
+  </div>`;
 }
 
-function renderSchedule() {
-  var grid = document.getElementById('scheduleGrid');
-  var allSched = [...items.todo, ...items.followup].filter(it => it.scheduleDate);
-  if (!allSched.length) {
-    grid.innerHTML = '<div class="schedule-empty-state"><span class="icon">◎</span><p>Dump your tasks on the Capture tab<br>and the AI will schedule them here.</p></div>';
-    return;
-  }
-  var count = horizon === 'week' ? 7 : horizon === 'twoweek' ? 14 : 30;
-  var today = new Date(); today.setHours(0,0,0,0);
-  grid.innerHTML = '';
-  for (var i = 0; i < count; i++) {
-    var d = new Date(today); d.setDate(today.getDate() + i);
-    var dateStr = d.toISOString().split('T')[0];
-    var isToday = i === 0;
-    var dayItems = allSched.filter(it => it.scheduleDate === dateStr);
-    if (horizon !== 'week' && !dayItems.length) continue;
-    var row = document.createElement('div');
-    row.className = 'day-row' + (isToday ? ' day-today' : '');
-    row.style.animationDelay = (i * 0.025) + 's';
-    var dayName = isToday ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' });
-    var dayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    row.innerHTML = '<div class="day-label"><span class="day-name">' + dayName + '</span><span class="day-date">' + dayDate + '</span></div><div class="day-tasks" id="dt-' + dateStr + '"></div>';
-    grid.appendChild(row);
-    var tc = row.querySelector('#dt-' + dateStr);
-    if (!dayItems.length) {
-      tc.innerHTML = '<div class="day-empty">— clear</div>';
-    } else {
-      dayItems.forEach(function(item, j) {
-        var cat = item.id.startsWith('todo') ? 'todo' : 'followup';
-        var sc = document.createElement('div');
-        sc.className = 'sched-card' + (item.done ? ' done' : '');
-        sc.style.animationDelay = (j * 0.04) + 's';
-        sc.dataset.id = item.id;
-        sc.onclick = function() { toggleItem(cat, item.id, true); };
-        sc.innerHTML = '<div class="sched-check"><svg width="7" height="5" viewBox="0 0 7 5" fill="none"><path d="M1 2.5L2.8 4.2L6 1" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="sched-dot ' + item.priority + '"></div><div class="sched-body"><div class="sched-title">' + item.title + '</div><div class="sched-meta"><span class="sched-type ' + cat + '">' + (cat === 'todo' ? 'To Do' : 'Follow Up') + '</span>' + (item.time ? '<span class="sched-time">' + item.time + '</span>' : '') + '</div></div>';
-        tc.appendChild(sc);
-      });
+function stageBars(){
+  const groups=[['screening','Screening'],['dd','In Diligence'],['ic','IC Review'],['approved','Approved'],['hold','On Hold'],['declined','Declined']];
+  const max=DEALS.length;
+  return '<div class="risk-dims">'+groups.map(([k,label])=>{
+    const n=DEALS.filter(d=>d.status===k).length;
+    const pct=Math.round(n/max*100);
+    return `<div class="risk-dim"><div class="risk-dim-head"><span class="risk-dim-name">${label}</span><span class="mono" style="color:var(--text-2)">${n}</span></div>
+      <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${Math.max(pct,3)}%;background:var(--accent)"></div></div></div>`;
+  }).join('')+'</div>';
+}
+function sectorBars(){
+  const map={};
+  DEALS.forEach(d=>{ const s=d.sector.split(' / ')[0]; map[s]=(map[s]||0)+d.ticket; });
+  const total=Object.values(map).reduce((a,b)=>a+b,0);
+  return '<div class="risk-dims">'+Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([s,v],i)=>{
+    const pct=Math.round(v/total*100);
+    return `<div class="risk-dim"><div class="risk-dim-head"><span class="risk-dim-name">${s}</span><span class="mono" style="color:var(--text-2)">${fmtUSD(v)}</span></div>
+      <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${pct}%;background:${COLORS[i%COLORS.length]}"></div></div></div>`;
+  }).join('')+'</div>';
+}
+
+/* ---------- pipeline ---------- */
+function renderPipeline(){
+  const filters=[['all','All'],['screening','Screening'],['dd','In Diligence'],['ic','IC Review'],['approved','Approved'],['hold','On Hold'],['declined','Declined']];
+  let list=DEALS.filter(d=>state.filter==='all'||d.status===state.filter);
+  if(state.search) list=list.filter(d=>(d.company+' '+d.sector+' '+d.country).toLowerCase().includes(state.search));
+
+  return `
+  <div class="page-head"><div class="page-head-row"><div>
+    <div class="page-title serif">Deal Pipeline</div>
+    <div class="page-desc">${DEALS.length} opportunities under evaluation · ${fmtUSD(DEALS.reduce((s,d)=>s+d.ticket,0))} aggregate ticket value</div>
+  </div></div></div>
+
+  <div class="toolbar">
+    ${filters.map(([k,l])=>`<div class="chip ${state.filter===k?'active':''}" onclick="setFilter('${k}')">${l}</div>`).join('')}
+  </div>
+
+  <div class="card">
+    <table class="deal-table">
+      <thead><tr><th>Company</th><th>Stage</th><th>Geography</th><th>Ticket</th><th>Status</th><th>Risk</th><th>Lead</th></tr></thead>
+      <tbody>
+        ${list.length? list.map(d=>dealRow(d, DEALS.indexOf(d), false)).join('') : '<tr><td colspan="7"><div class="empty">No deals match this view.</div></td></tr>'}
+      </tbody>
+    </table>
+  </div>`;
+}
+function setFilter(f){ state.filter=f; render(); }
+
+function dealRow(d, i, compact){
+  const sm=STATUS_META[d.status];
+  const cells = compact ? `
+    <td><div class="co-cell"><div class="co-logo" style="background:${logoColor(i)}">${initials(d.company)}</div>
+      <div><div class="co-name">${d.company}</div><div class="co-sub">${d.sector.split(' / ')[0]} · ${d.country}</div></div></div></td>
+    <td><span class="badge ${sm.cls}"><span class="dot"></span>${sm.label}</span></td>
+    <td>${riskPill(d.risk)}</td>` : `
+    <td><div class="co-cell"><div class="co-logo" style="background:${logoColor(i)}">${initials(d.company)}</div>
+      <div><div class="co-name">${d.company}</div><div class="co-sub">${d.sector}</div></div></div></td>
+    <td class="mono" style="color:var(--text-2)">${d.stage}</td>
+    <td style="color:var(--text-2)">${d.country}</td>
+    <td class="mono" style="font-weight:500">${fmtUSD(d.ticket)}</td>
+    <td><span class="badge ${sm.cls}"><span class="dot"></span>${sm.label}</span></td>
+    <td>${riskPill(d.risk)}</td>
+    <td style="color:var(--text-2)">${d.lead}</td>`;
+  return `<tr onclick="openDeal('${d.id}')">${cells}</tr>`;
+}
+function riskPill(r){
+  const l=lvl(r);
+  return `<span class="risk-pill"><span class="risk-track"><span class="risk-fill fill-${l}" style="width:${r}%"></span></span><span class="risk-num lvl-${l}">${r}</span></span>`;
+}
+function openDeal(id){ state.dealId=id; state.dealTab='overview'; go('deal'); }
+
+/* ---------- deal detail ---------- */
+function renderDeal(d){
+  const i=DEALS.indexOf(d); const sm=STATUS_META[d.status];
+  const pendingDocs=d.docs.filter(x=>x.status==='pending').length;
+  const tabs=[['overview','Overview'],['documents','Documents'],['risk','Risk & Red Flags'],['report','DD Report']];
+  return `
+  <div class="back-link" onclick="go('pipeline')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to pipeline</div>
+
+  <div class="detail-head">
+    <div class="detail-logo" style="background:${logoColor(i)}">${initials(d.company)}</div>
+    <div class="detail-head-info">
+      <div class="detail-co serif">${d.company}</div>
+      <div class="detail-meta">
+        <span>${d.sector}</span>
+        <span>•</span><span>${d.country}</span>
+        <span>•</span><span>${d.stage}</span>
+        <span>•</span><span>Ticket ${fmtUSD(d.ticket)} · ${d.ownership}%</span>
+      </div>
+    </div>
+    <div class="detail-actions">
+      <span class="badge ${sm.cls}"><span class="dot"></span>${sm.label}</span>
+      ${riskPill(d.risk)}
+    </div>
+  </div>
+
+  <div class="tabs">
+    ${tabs.map(([k,l])=>`<div class="tab ${state.dealTab===k?'active':''}" onclick="setDealTab('${k}')">${l}${k==='documents'&&pendingDocs?`<span class="pip">${pendingDocs}</span>`:''}</div>`).join('')}
+  </div>
+
+  <div id="dealTabBody">${renderDealTab(d)}</div>`;
+}
+function setDealTab(t){ state.dealTab=t; document.getElementById('dealTabBody').innerHTML=renderDealTab(getDeal()); afterDealTabRender(getDeal()); }
+
+function renderDealTab(d){
+  if(state.dealTab==='overview') return renderOverview(d);
+  if(state.dealTab==='documents') return renderDocuments(d);
+  if(state.dealTab==='risk') return renderRiskTab(d);
+  if(state.dealTab==='report') return renderReportTab(d);
+}
+function afterDealRender(d){ afterDealTabRender(d); }
+function afterDealTabRender(d){ if(state.dealTab==='risk') drawGauge(d.risk); }
+
+function renderOverview(d){
+  return `<div class="grid-2">
+    <div>
+      <div class="ai-block">
+        <div class="ai-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18.5 9l-3.5 3.1.9 4.9L12 14.6 8.1 17l.9-4.9L5.5 9l4.6-1.4L12 3z"/></svg>AI Diligence Summary</div>
+        <div class="ai-summary-text">${d.aiSummary}</div>
+      </div>
+      <div class="card panel section-gap">
+        <div class="panel-head"><div class="panel-title serif">Investment thesis</div></div>
+        <div class="thesis">${d.thesis}</div>
+      </div>
+    </div>
+    <div>
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title sm serif">Key financials</div></div>
+        <div class="kv-list">${Object.entries(d.financials).map(([k,v])=>`<div class="kv"><span class="kv-k">${k}</span><span class="kv-v mono">${v}</span></div>`).join('')}</div>
+      </div>
+      <div class="card panel section-gap">
+        <div class="panel-head"><div class="panel-title sm serif">Deal facts</div></div>
+        <div class="kv-list">
+          <div class="kv"><span class="kv-k">Lead analyst</span><span class="kv-v">${d.lead}</span></div>
+          <div class="kv"><span class="kv-k">Date added</span><span class="kv-v">${fmtDate(d.added)}</span></div>
+          <div class="kv"><span class="kv-k">Documents</span><span class="kv-v">${d.docs.length} (${d.docs.filter(x=>x.status==='analyzed').length} analyzed)</span></div>
+          <div class="kv"><span class="kv-k">Open red flags</span><span class="kv-v lvl-${lvl(d.risk)}">${d.redFlags.length}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function fmtDate(s){ const d=new Date(s); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+
+/* ---------- documents ---------- */
+function renderDocuments(d){
+  return `
+  <div class="dropzone" id="dropzone" onclick="simulateUpload()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    <b>Drop data-room files or click to upload</b>
+    <small>PDF, XLSX, DOCX, PPTX · Aegis will analyze each document with AI</small>
+  </div>
+  <div id="docList">${d.docs.map((doc,i)=>docRow(doc,i)).join('')}</div>`;
+}
+function docRow(doc,i){
+  const analyzed=doc.status==='analyzed' && doc.summary;
+  const status = analyzed
+    ? `<span class="badge b-approved"><span class="dot"></span>Analyzed</span>`
+    : (doc.status==='analyzing'
+        ? `<span class="doc-status" style="color:var(--accent)"><span class="doc-spin"></span>Analyzing…</span>`
+        : `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();analyzeDoc(${i})">Analyze with AI</button>`);
+  return `
+  <div class="doc-row" data-doc="${i}">
+    <div class="doc-icon ${doc.type}">${doc.type.toUpperCase()}</div>
+    <div class="doc-info"><div class="doc-name">${doc.name}</div><div class="doc-sub">${doc.size||'—'}${analyzed?' · analyzed by Aegis AI':''}</div></div>
+    <div class="doc-status-wrap">${status}</div>
+  </div>
+  ${analyzed?findingsPanel(doc):''}`;
+}
+function findingsPanel(doc){
+  return `<div class="findings-panel">
+    <div class="ai-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18.5 9l-3.5 3.1.9 4.9L12 14.6 8.1 17l.9-4.9L5.5 9l4.6-1.4L12 3z"/></svg>AI Analysis</div>
+    <div class="finding-summary">${doc.summary}</div>
+    <ul class="finding-list">${doc.findings.map(f=>`<li>${findingIcon(f.t)}<span>${f.x}</span></li>`).join('')}</ul>
+    ${doc.extracted?`<div class="extracted-grid">${Object.entries(doc.extracted).map(([k,v])=>`<div class="extracted-cell"><div class="ek">${k}</div><div class="ev">${v}</div></div>`).join('')}</div>`:''}
+  </div>`;
+}
+function findingIcon(t){
+  if(t==='pos') return '<svg class="pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>';
+  if(t==='neg') return '<svg class="neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';
+  return '<svg class="neu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>';
+}
+
+/* simulated per-document AI analysis */
+const ANALYSIS_STEPS=['Parsing document structure…','Extracting key figures…','Cross-checking against deal model…','Identifying findings & flags…','Synthesizing summary…'];
+function analyzeDoc(i){
+  const d=getDeal(); const doc=d.docs[i];
+  doc.status='analyzing';
+  // generate plausible AI output if not pre-baked
+  if(!doc.summary){ Object.assign(doc, syntheticAnalysis(d, doc)); }
+  document.getElementById('docList').innerHTML=d.docs.map((dc,ix)=>docRow(dc,ix)).join('');
+  let step=0;
+  const row=document.querySelector(`[data-doc="${i}"] .doc-status-wrap`);
+  const tick=setInterval(()=>{
+    if(row) row.innerHTML=`<span class="doc-status" style="color:var(--accent)"><span class="doc-spin"></span>${ANALYSIS_STEPS[step]||'Finishing…'}</span>`;
+    step++;
+    if(step>ANALYSIS_STEPS.length){
+      clearInterval(tick);
+      doc.status='analyzed';
+      saveDocFlags();
+      document.getElementById('docList').innerHTML=d.docs.map((dc,ix)=>docRow(dc,ix)).join('');
+      toast('Document analyzed — '+doc.findings.length+' findings extracted');
+      // update tab pip
+      render();
     }
+  }, 620);
+}
+function syntheticAnalysis(d, doc){
+  return {
+    summary:`AI review of “${doc.name}” complete. The document is consistent with the broader diligence file for ${d.company}; no contradictions with previously analyzed materials were detected. Key terms and figures have been extracted and reconciled against the deal model.`,
+    findings:[
+      {t:'pos', x:'Document is internally consistent and aligns with the data-room narrative.'},
+      {t:'neu', x:'Key dates, parties, and figures extracted and indexed for the report.'},
+      {t:'neg', x:'One item warrants confirmation with the deal team before sign-off.'},
+    ],
+    extracted:{ Pages:String(8+Math.floor(Math.random()*40)), Findings:'3', Confidence:'High', Flags:'0' },
+  };
+}
+function simulateUpload(){
+  const d=getDeal();
+  const names=['Management Accounts FY25.xlsx','Cap Table (current).xlsx','Customer Reference Calls.docx','Insurance & Litigation Summary.pdf','Tax Structuring Memo.pdf'];
+  const types=['xls','xls','doc','pdf','pdf'];
+  const existing=d.docs.map(x=>x.name);
+  let idx=names.findIndex(n=>!existing.includes(n));
+  if(idx<0){ toast('All sample documents already uploaded'); return; }
+  d.docs.push({ name:names[idx], type:types[idx], size:(1+Math.random()*9).toFixed(1)+' MB', status:'pending' });
+  document.getElementById('docList').innerHTML=d.docs.map((dc,ix)=>docRow(dc,ix)).join('');
+  toast('“'+names[idx]+'” uploaded — ready for AI analysis');
+  render();
+}
+
+/* ---------- risk tab ---------- */
+function renderRiskTab(d){
+  const dims=Object.entries(d.riskBreakdown);
+  const flagsBySev={high:[],med:[],low:[]};
+  d.redFlags.forEach(f=>flagsBySev[f.sev].push(f));
+  const order=['high','med','low'];
+  return `
+  <div class="grid-2">
+    <div class="card panel">
+      <div class="panel-head"><div class="panel-title serif">Risk assessment</div>
+        <span class="badge ${d.risk<34?'b-approved':d.risk<67?'b-dd':'b-declined'}"><span class="dot"></span>${lvlWord(d.risk)} risk</span></div>
+      <div class="risk-overview">
+        <div class="gauge"><svg width="150" height="150" viewBox="0 0 150 150">
+          <circle cx="75" cy="75" r="62" fill="none" stroke="var(--bg)" stroke-width="11"/>
+          <circle id="gaugeArc" cx="75" cy="75" r="62" fill="none" stroke="var(--${d.risk<34?'green':d.risk<67?'amber':'red'})" stroke-width="11" stroke-linecap="round" stroke-dasharray="0 999"/>
+        </svg><div class="gauge-center"><div class="gauge-score serif lvl-${lvl(d.risk)}">${d.risk}</div><div class="gauge-label">Risk Score</div></div></div>
+        <div class="risk-legend">
+          <div class="risk-summary-text">Aegis aggregates six diligence dimensions into a composite risk score of <strong style="color:var(--text)">${d.risk}/100</strong> for ${d.company}. ${d.redFlags.filter(f=>f.sev==='high').length} high-severity ${d.redFlags.filter(f=>f.sev==='high').length===1?'flag has':'flags have'} been raised. Scores are AI-generated from the diligence file and should be confirmed by the deal team.</div>
+        </div>
+      </div>
+      <div class="section-gap"></div>
+      <div class="risk-dims">
+        ${dims.map(([k,v])=>{
+          const m=RISK_DIM_META[k];
+          return `<div class="risk-dim">
+            <div class="risk-dim-head">
+              <span class="risk-dim-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="${m.icon}"/></svg>${m.label}</span>
+              <span class="risk-num lvl-${lvl(v.score)}">${v.score}</span></div>
+            <div class="risk-bar-track"><div class="risk-bar-fill fill-${lvl(v.score)}" style="width:${v.score}%"></div></div>
+            <div class="risk-dim-note">${v.note}</div></div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title serif">Red flags</div><span class="badge b-declined"><span class="dot"></span>${d.redFlags.length} flagged</span></div>
+        ${order.flatMap(s=>flagsBySev[s]).map(f=>`
+          <div class="flag sev-${f.sev}">
+            <div class="flag-sev"></div>
+            <div class="flag-body">
+              <div class="flag-top"><span class="flag-title">${f.title}</span><span class="flag-sev-tag">${f.sev==='high'?'High':f.sev==='med'?'Medium':'Low'}</span><span class="flag-cat">${f.cat}</span></div>
+              <div class="flag-detail">${f.detail}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function drawGauge(score){
+  const arc=document.getElementById('gaugeArc'); if(!arc) return;
+  const r=62, circ=2*Math.PI*r, len=circ*(score/100);
+  setTimeout(()=>{ arc.style.transition='stroke-dasharray 1s cubic-bezier(.4,0,.2,1)'; arc.setAttribute('stroke-dasharray', `${len} ${circ}`); }, 60);
+}
+
+/* ---------- report tab ---------- */
+function renderReportTab(d){
+  if(state.reports[d.id]){
+    return `<div class="report-bar">
+        <button class="btn btn-ghost btn-sm" onclick="window.print()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg> Print / PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="regenReport('${d.id}')">Regenerate</button>
+      </div>
+      ${state.reports[d.id]}`;
   }
+  return `<div class="card"><div class="report-empty" id="reportEmpty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h1"/></svg>
+    <h3 class="serif">Generate the diligence memo</h3>
+    <p>Aegis will synthesize the analyzed documents, risk assessment, and red flags into a committee-ready due-diligence memorandum for ${d.company}.</p>
+    <button class="btn btn-primary" style="width:auto" onclick="generateReport('${d.id}')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.9 4.6L18.5 9l-3.5 3.1.9 4.9L12 14.6 8.1 17l.9-4.9L5.5 9l4.6-1.4L12 3z"/></svg>
+      Generate DD Report with AI</button>
+  </div></div>`;
+}
+const REPORT_STEPS=['Compiling analyzed documents…','Synthesizing risk assessment…','Drafting executive summary…','Formulating recommendation…','Formatting committee memo…'];
+function generateReport(id){
+  const d=DEALS.find(x=>x.id===id);
+  const body=document.getElementById('dealTabBody');
+  body.innerHTML=`<div class="card"><div class="gen-overlay"><div class="gen-ring"></div><div class="gen-status serif" id="genStatus">${REPORT_STEPS[0]}</div></div></div>`;
+  let step=0;
+  const tick=setInterval(()=>{
+    step++;
+    const el=document.getElementById('genStatus');
+    if(el && step<REPORT_STEPS.length) el.textContent=REPORT_STEPS[step];
+    if(step>=REPORT_STEPS.length){
+      clearInterval(tick);
+      state.reports[id]=buildReport(d);
+      saveReports();
+      body.innerHTML=renderReportTab(d);
+      toast('Due-diligence memo generated');
+      render();
+    }
+  }, 700);
+}
+function regenReport(id){ delete state.reports[id]; const d=DEALS.find(x=>x.id===id); generateReport(id); }
+
+function buildReport(d){
+  const highFlags=d.redFlags.filter(f=>f.sev==='high');
+  const proceed = d.status==='approved' || (d.risk<45 && highFlags.length===0);
+  const decline = d.status==='declined';
+  let rec, recCls, recText;
+  if(decline){ rec='Recommendation: Decline'; recCls='conditional'; recText='Diligence findings fall below the authority\'s investability threshold; we recommend declining this opportunity.'; }
+  else if(proceed){ rec='Recommendation: Proceed to Investment Committee'; recCls='proceed'; recText='Diligence supports advancing this opportunity to the Investment Committee, subject to standard documentation and governance protections.'; }
+  else { rec='Recommendation: Proceed — Conditional'; recCls='conditional'; recText='We recommend proceeding subject to resolution of the conditions precedent set out below; absent these, risk-adjusted returns approach the authority\'s hurdle.'; }
+
+  const conditions = decline
+    ? d.redFlags.filter(f=>f.sev!=='low').map(f=>`Basis for decline — ${f.title}: ${f.cat.toLowerCase()} concern of ${f.sev==='high'?'high':'medium'} severity.`)
+    : (highFlags.length? highFlags : d.redFlags.filter(f=>f.sev==='med')).map(f=>`Resolve ${f.title.toLowerCase()} (${f.cat}) prior to final commitment.`);
+  const condList = conditions.length? conditions : ['No material conditions outstanding; standard documentation protections apply.'];
+
+  const strengths = d.docs.filter(x=>x.summary).flatMap(x=>x.findings.filter(f=>f.t==='pos').map(f=>f.x)).slice(0,4);
+  const concerns = d.redFlags.map(f=>`${f.title} — ${f.detail.split('.')[0]}.`);
+
+  return `<div class="report-doc" id="reportDoc">
+    <div class="r-eyebrow">Investment Authority · Confidential</div>
+    <h1>Due Diligence Memorandum</h1>
+    <div class="r-sub">${d.company} · ${d.sector} · Prepared ${fmtDate('2026-06-14')} · Lead: ${d.lead}</div>
+    <div class="r-rule"></div>
+
+    <div class="r-grid">
+      <div><div class="rg-row"><span class="rg-k">Opportunity</span><span class="rg-v">${d.company}</span></div>
+        <div class="rg-row"><span class="rg-k">Geography</span><span class="rg-v">${d.country}</span></div>
+        <div class="rg-row"><span class="rg-k">Stage</span><span class="rg-v">${d.stage}</span></div></div>
+      <div><div class="rg-row"><span class="rg-k">Proposed ticket</span><span class="rg-v">${fmtUSD(d.ticket)} (${d.ownership}%)</span></div>
+        <div class="rg-row"><span class="rg-k">Composite risk</span><span class="rg-v">${d.risk}/100 · ${lvlWord(d.risk)}</span></div>
+        <div class="rg-row"><span class="rg-k">Red flags</span><span class="rg-v">${d.redFlags.length} (${highFlags.length} high)</span></div></div>
+    </div>
+
+    <h2>1 · Executive Summary</h2>
+    ${d.aiSummary.replace(/<strong>/g,'<strong>').replace(/style="[^"]*"/g,'')}
+
+    <h2>2 · Investment Thesis</h2>
+    <p>${d.thesis.replace(/<\/?strong>/g,'').replace(/style="[^"]*"/g,'')}</p>
+
+    <h2>3 · Key Strengths</h2>
+    <ul>${(strengths.length?strengths:['Diligence corroborates the core elements of the investment thesis.']).map(s=>`<li>${s}</li>`).join('')}</ul>
+
+    <h2>4 · Risk Assessment</h2>
+    <p>The composite risk score is <strong>${d.risk}/100 (${lvlWord(d.risk)})</strong>, aggregated across six dimensions. The most material concerns are:</p>
+    <ul>${concerns.map(c=>`<li>${c}</li>`).join('')}</ul>
+
+    <h2>5 · Conditions ${decline?'/ Basis':'Precedent'}</h2>
+    <ul>${condList.map(c=>`<li>${c}</li>`).join('')}</ul>
+
+    <h2>6 · Recommendation</h2>
+    <div class="r-rec ${recCls}">${rec}</div>
+    <p>${recText}</p>
+
+    <div class="r-foot">Generated by Aegis AI from ${d.docs.filter(x=>x.summary).length} analyzed document(s). This memorandum is a decision-support draft and does not constitute investment advice; all findings should be independently verified by the deal team prior to committee submission.</div>
+  </div>`;
 }
 
-function toggleItem(cat, id, fromSchedule) {
-  items[cat] = items[cat].map(t => t.id === id ? { ...t, done: !t.done } : t);
-  var isDone = items[cat].find(t => t.id === id).done;
-  var card = document.querySelector('#cards-' + cat + ' [data-id="' + id + '"]');
-  if (card) card.className = 'card' + (isDone ? ' done' : '');
-  var scard = document.querySelector('#panel-schedule [data-id="' + id + '"]');
-  if (scard) scard.className = 'sched-card' + (isDone ? ' done' : '');
-  updateProgress(); updateBadges(); saveCurrentUserData();
+/* ---------- reports list ---------- */
+function renderReports(){
+  const ids=Object.keys(state.reports);
+  if(!ids.length){
+    return `<div class="page-head"><div class="page-title serif">DD Reports</div><div class="page-desc">Committee-ready memoranda generated by Aegis.</div></div>
+      <div class="card"><div class="report-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+        <h3 class="serif">No reports yet</h3>
+        <p>Open a deal, analyze its documents, then generate a due-diligence memo. Generated memos will appear here.</p>
+        <button class="btn btn-primary" style="width:auto" onclick="go('pipeline')">Go to pipeline</button>
+      </div></div>`;
+  }
+  return `<div class="page-head"><div class="page-title serif">DD Reports</div><div class="page-desc">${ids.length} committee-ready ${ids.length===1?'memo':'memos'} generated.</div></div>
+    <div class="card"><table class="deal-table"><thead><tr><th>Company</th><th>Sector</th><th>Ticket</th><th>Risk</th><th>Recommendation</th><th></th></tr></thead><tbody>
+    ${ids.map(id=>{ const d=DEALS.find(x=>x.id===id); const i=DEALS.indexOf(d);
+      const highFlags=d.redFlags.filter(f=>f.sev==='high').length;
+      const rec=d.status==='declined'?'Decline':(d.risk<45&&highFlags===0)?'Proceed to IC':'Proceed (conditional)';
+      const recCls=rec==='Decline'?'b-declined':rec==='Proceed to IC'?'b-approved':'b-dd';
+      return `<tr onclick="openReport('${id}')">
+        <td><div class="co-cell"><div class="co-logo" style="background:${logoColor(i)}">${initials(d.company)}</div><div><div class="co-name">${d.company}</div><div class="co-sub">${d.country}</div></div></div></td>
+        <td style="color:var(--text-2)">${d.sector.split(' / ')[0]}</td>
+        <td class="mono" style="font-weight:500">${fmtUSD(d.ticket)}</td>
+        <td>${riskPill(d.risk)}</td>
+        <td><span class="badge ${recCls}"><span class="dot"></span>${rec}</span></td>
+        <td style="text-align:right;color:var(--muted)">View →</td></tr>`;
+    }).join('')}
+    </tbody></table></div>`;
+}
+function openReport(id){ state.dealId=id; state.dealTab='report'; go('deal'); }
+
+/* ---------- risk monitor ---------- */
+function renderRiskMonitor(){
+  const sorted=[...DEALS].sort((a,b)=>b.risk-a.risk);
+  const allFlags=[];
+  DEALS.forEach(d=>d.redFlags.forEach(f=>{ if(f.sev==='high') allFlags.push({...f, company:d.company, id:d.id}); }));
+  return `
+  <div class="page-head"><div class="page-title serif">Risk Monitor</div><div class="page-desc">Cross-portfolio risk ranking and active high-severity flags.</div></div>
+
+  <div class="grid-2">
+    <div class="card panel">
+      <div class="panel-head"><div class="panel-title serif">Risk ranking</div></div>
+      <div class="risk-dims">
+        ${sorted.map(d=>`<div class="risk-dim" style="cursor:pointer" onclick="openDeal('${d.id}')">
+          <div class="risk-dim-head"><span class="risk-dim-name">${d.company}<span style="color:var(--muted);font-weight:400;font-size:0.78rem">· ${d.sector.split(' / ')[0]}</span></span><span class="risk-num lvl-${lvl(d.risk)}">${d.risk}</span></div>
+          <div class="risk-bar-track"><div class="risk-bar-fill fill-${lvl(d.risk)}" style="width:${d.risk}%"></div></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="card panel">
+      <div class="panel-head"><div class="panel-title serif">Active high-severity flags</div><span class="badge b-declined"><span class="dot"></span>${allFlags.length}</span></div>
+      ${allFlags.map(f=>`<div class="flag sev-high" style="cursor:pointer" onclick="openDeal('${f.id}')">
+        <div class="flag-sev"></div>
+        <div class="flag-body"><div class="flag-top"><span class="flag-title">${f.title}</span><span class="flag-cat">${f.company}</span></div>
+        <div class="flag-detail">${f.detail.split('.')[0]}.</div></div></div>`).join('')}
+    </div>
+  </div>`;
 }
 
-function updateProgress() {
-  ['todo','remember','followup'].forEach(function(cat) {
-    var done = items[cat].filter(t => t.done).length;
-    var total = items[cat].length;
-    document.getElementById('fill-' + cat).style.width = total ? Math.round(done/total*100) + '%' : '0%';
-    document.getElementById('prog-' + cat).textContent = total ? done + '/' + total : '—';
-  });
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
-function updateBadges() {
-  var total = items.todo.length + items.remember.length + items.followup.length;
-  var sched = [...items.todo, ...items.followup].filter(i => i.scheduleDate).length;
-  document.getElementById('badge-capture').textContent = total;
-  document.getElementById('badge-schedule').textContent = sched;
-}
-
-function clearAll() {
-  items = { todo: [], remember: [], followup: [] };
-  schedule = [];
-  ['todo','remember','followup'].forEach(function(cat) {
-    document.getElementById('cards-' + cat).innerHTML = '<div class="col-empty">' + EMPTIES[cat] + '</div>';
-    document.getElementById('count-' + cat).style.display = 'none';
-    document.getElementById('fill-' + cat).style.width = '0%';
-    document.getElementById('prog-' + cat).textContent = '—';
-  });
-  document.getElementById('summaryBar').style.display = 'none';
-  document.getElementById('clearBtn').style.display = 'none';
-  document.getElementById('footer').style.display = 'none';
-  document.getElementById('dump').value = '';
-  document.getElementById('btnText').textContent = 'Organize →';
-  document.getElementById('badge-capture').textContent = '0';
-  document.getElementById('badge-schedule').textContent = '0';
-  document.getElementById('scheduleGrid').innerHTML = '<div class="schedule-empty-state"><span class="icon">◎</span><p>Dump your tasks on the Capture tab<br>and the AI will schedule them here.</p></div>';
-  saveCurrentUserData();
-}
-
-/* ══════════════════════════════════════
-   INIT
-══════════════════════════════════════ */
-initPinInputs('si-pin-wrap');
-initPinInputs('cr-pin-wrap');
-loadExistingUsers();
-
-document.getElementById('dump').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) analyze();
-});
+/* ---------- boot ---------- */
+(function boot(){
+  const u=localStorage.getItem('aegis_user');
+  if(u){ try{ enterApp(JSON.parse(u)); return; }catch(e){} }
+  setAuthMode('signin');
+})();
 </script>
 </body>
 </html>
